@@ -1,0 +1,29 @@
+<svg width="200" height="150" viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tablet Device -->
+  <rect x="40" y="30" width="120" height="90" rx="5" fill="#333333" stroke="#000000" stroke-width="2"/>
+  <rect x="45" y="35" width="110" height="75" rx="2" fill="#FFFFFF" stroke="#000000" stroke-width="1"/>
+  
+  <!-- Screen Content -->
+  <rect x="55" y="45" width="90" height="10" rx="2" fill="#E0E0E0"/>
+  <rect x="55" y="60" width="40" height="40" rx="2" fill="#A0D8FF"/>
+  <rect x="105" y="60" width="40" height="5" rx="1" fill="#E0E0E0"/>
+  <rect x="105" y="70" width="40" height="5" rx="1" fill="#E0E0E0"/>
+  <rect x="105" y="80" width="40" height="5" rx="1" fill="#E0E0E0"/>
+  <rect x="105" y="90" width="20" height="10" rx="5" fill="#4CAF50"/>
+  
+  <!-- Checkmark in Box -->
+  <path d="M65 80 L75 90 L85 70" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Person -->
+  <circle cx="150" cy="110" r="15" fill="#0066CC"/>
+  <rect x="145" y="125" width="10" height="20" fill="#0066CC"/>
+  <line x1="150" y1="135" x2="140" y2="145" stroke="#0066CC" stroke-width="3" stroke-linecap="round"/>
+  <line x1="150" y1="135" x2="160" y2="145" stroke="#0066CC" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Product/Part being inspected -->
+  <rect x="30" y="100" width="60" height="30" rx="5" fill="#C0C0C0" stroke="#333333" stroke-width="1"/>
+  <circle cx="45" cy="115" r="5" fill="#E0E0E0" stroke="#333333" stroke-width="1"/>
+  <circle cx="75" cy="115" r="5" fill="#E0E0E0" stroke="#333333" stroke-width="1"/>
+  <line x1="55" y1="110" x2="65" y2="120" stroke="#333333" stroke-width="1"/>
+  <line x1="65" y1="110" x2="55" y2="120" stroke="#333333" stroke-width="1"/>
+</svg>
