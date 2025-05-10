@@ -3,12 +3,10 @@ FROM node:22
 WORKDIR /app
 
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile  
+RUN yarn install --frozen-lockfile
 
 COPY . .
 
-RUN yarn start
-
 EXPOSE 3001
 
-CMD ["node", "dist/main"]
+CMD ["yarn", "start:dev"]
