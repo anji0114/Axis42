@@ -1,58 +1,77 @@
-import { Injectable } from '@nestjs/common';
-import { Item } from './entities/item.entity';
-import { CreateItemDto } from './dto/create-item.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+
+type Item = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  soldedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 @Injectable()
 export class ItemsService {
-  private items = [
-    { id: 1, name: 'Item 1', description: 'Item 1 description' },
-    { id: 2, name: 'Item 2', description: 'Item 2 description' },
-    { id: 3, name: 'Item 3', description: 'Item 3 description' },
-  ];
+  constructor(private prisma: PrismaService) {}
 
   findAll(): { message: string; data: Item[] } {
     return {
       message: 'This action returns all items !!',
-      data: this.items,
+      data: [],
     };
   }
 
-  findOne(id: string): { message: string; data: Item | undefined } {
+  findOne(id: string): { message: string; data: Item } {
+    const item = {
+      id: 1,
+      name: 'Item 1',
+      description: 'Description 1',
+      price: 100,
+      soldedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    if (!item) {
+      throw new NotFoundException(`Item with ID ${id} not found`);
+    }
+
     return {
       message: `This action returns a #${id} item !!`,
-      data: this.items.find((item) => item.id === parseInt(id)),
+      data: item,
     };
   }
 
-  create(dto: CreateItemDto): { message: string; data: Item } {
-    const newItem = {
-      id: this.items.length + 1,
-      name: dto.name,
-      description: dto.description,
-    };
-    this.items.push(newItem);
+  async create(
+    dto: Prisma.ItemsCreateInput,
+  ): Promise<{ message: string; data: Item }> {
+    const item = await this.prisma.items.create({
+      data: dto,
+    });
+
     return {
       message: 'Item created successfully',
-      data: newItem,
+      data: item,
     };
   }
 
-  update(
-    id: string,
-    dto: UpdateItemDto,
-  ): { message: string; data: Item | null } {
-    const itemIndex = this.items.findIndex((item) => item.id === parseInt(id));
-    if (itemIndex === -1) {
-      return {
-        message: 'Item not found',
-        data: null,
-      };
-    }
-    this.items[itemIndex] = { ...this.items[itemIndex], ...dto };
+  update(id: string, dto: UpdateItemDto): { message: string; data: Item } {
+    const updatedItem = {
+      id: 1,
+      name: dto.name || '',
+      description: 'aa',
+      price: 100,
+      soldedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
     return {
       message: 'Item updated successfully',
-      data: this.items[itemIndex],
+      data: updatedItem,
     };
   }
 }

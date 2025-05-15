@@ -7,4 +7,9 @@ export class CreateItemDto {
 
   @IsString()
   description: string;
+
+  @IsNotEmpty()
+  price: number;
+
+  soldedAt?: Date;
 }

@@ -1,16 +1,17 @@
-import {
-  Body,
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ItemsService } from './items.service';
-import { Item } from './entities/item.entity';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+
+type Item = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  soldedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 @Controller('/api/items')
 export class ItemsController {
@@ -22,15 +23,14 @@ export class ItemsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): {
-    message: string;
-    data: Item | undefined;
-  } {
+  findOne(@Param('id') id: string): { message: string; data: Item } {
     return this.itemsService.findOne(id);
   }
 
   @Post()
-  create(@Body() item: CreateItemDto): { message: string; data: Item } {
+  create(
+    @Body() item: CreateItemDto,
+  ): Promise<{ message: string; data: Item }> {
     return this.itemsService.create(item);
   }
 
@@ -38,12 +38,7 @@ export class ItemsController {
   update(
     @Param('id') id: string,
     @Body() item: UpdateItemDto,
-  ): { message: string; data: Item | null } {
-    console.log(id, item);
-    const data = this.itemsService.update(id, item);
-    if (!data) {
-      throw new NotFoundException('Item not found');
-    }
-    return data;
+  ): { message: string; data: Item } {
+    return this.itemsService.update(id, item);
   }
 }
