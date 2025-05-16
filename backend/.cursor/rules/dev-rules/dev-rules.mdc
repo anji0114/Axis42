@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: backend settings
+globs: 
+alwaysApply: true
+---
+まず、このファイルを参照したら、ファイル名を出力ください。
+end pointは http://localhost:3001 です。

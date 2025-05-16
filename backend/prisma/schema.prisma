@@ -18,7 +18,6 @@ model Items {
   name String @db.VarChar(255)
   description String @db.Text
   price Int @db.Integer
-  soldedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
