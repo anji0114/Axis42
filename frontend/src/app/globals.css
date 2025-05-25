@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 .primary-button {
-  @apply bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800;
+  @apply bg-red-900 text-white hover:bg-red-800 active:bg-red-700;
 }
 
 .secondary-button {
