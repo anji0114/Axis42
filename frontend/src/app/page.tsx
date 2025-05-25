@@ -7,20 +7,17 @@ const Home = () => {
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">DevBrief</h1>
+          <h1 className="text-2xl font-bold">VULCAN ENGINE</h1>
           <div className="space-x-4">
             <Link href="/reports" className="text-gray-600 hover:text-gray-900">
               Reports
             </Link>
             <Link
-              href="/settings/github"
+              href="/generate"
               className="text-gray-600 hover:text-gray-900"
             >
-              Settings
+              Generate
             </Link>
-            <Button href="/generate" variant="primary">
-              Generate Report
-            </Button>
           </div>
         </div>
       </nav>

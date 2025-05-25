@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "InspectNote - 製造業の検査DXソリューション",
-  description: "日本の製造業における検査プロセスのデジタルトランスフォーメーションを実現するInspectNoteアプリケーション",
+  title: "VULCAN ENGINE",
+  description:
+    "VULCAN ENGINE is a platform for creating and managing your own AI agents.",
 };
 
 export default function RootLayout({
