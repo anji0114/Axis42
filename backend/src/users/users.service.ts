@@ -1,41 +1,30 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  private readonly users: User[] = [
-    {
-      id: 1,
-      name: '山田太郎',
-      email: 'yamada@example.com',
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
-    },
-    {
-      id: 2,
-      name: '鈴木花子',
-      email: 'suzuki@example.com',
-      createdAt: new Date('2024-01-02'),
-      updatedAt: new Date('2024-01-02'),
-    },
-    {
-      id: 3,
-      name: '佐藤次郎',
-      email: 'sato@example.com',
-      createdAt: new Date('2024-01-03'),
-      updatedAt: new Date('2024-01-03'),
-    },
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  findAll(): User[] {
-    return this.users;
+  async findAll(): Promise<User[]> {
+    return this.prisma.user.findMany();
   }
 
-  findOne(id: number): User {
-    const user = this.users.find((user) => user.id === id);
-    if (!user) {
-      throw new Error(`User with ID ${id} not found`);
-    }
-    return user;
+  async findOneById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { id },
+    });
+  }
+
+  async findOneByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
+  async findOneByUsername(username: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { username },
+    });
   }
 }
