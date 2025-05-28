@@ -27,4 +27,19 @@ export class UsersService {
       where: { username },
     });
   }
+
+  updateUsername(id: number, username: string): User {
+    const userIndex = this.users.findIndex((user) => user.id === id);
+    if (userIndex === -1) {
+      throw new Error(`User with ID ${id} not found`);
+    }
+
+    this.users[userIndex] = {
+      ...this.users[userIndex],
+      name: username,
+      updatedAt: new Date(),
+    };
+
+    return this.users[userIndex];
+  }
 }
