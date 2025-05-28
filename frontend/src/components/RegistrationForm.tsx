@@ -75,8 +75,8 @@ export default function RegistrationForm({ onSubmit, isLoading = false }: Regist
     e.preventDefault();
     
     if (validateForm()) {
-      const { confirmPassword, ...submitData } = formData;
-      onSubmit?.(submitData);
+      const { confirmPassword, ...submitData }: { confirmPassword: string; [key: string]: string } = formData;
+      onSubmit?.(submitData as Omit<RegistrationFormData, 'confirmPassword'>);
     }
   };
 
