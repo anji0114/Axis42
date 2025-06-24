@@ -1,8 +1,0 @@
-mutation UpdateUsername($id: Int!, $username: String!) {
-  updateUsername(id: $id, username: $username) {
-    id
-    name
-    email
-    updatedAt
-  }
-}
