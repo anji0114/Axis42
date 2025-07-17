@@ -39,22 +39,33 @@ AIを活用して超高速で「触れるプロトタイプ」を生成するこ
 ### 認証設計
 
 #### 認証方式の選定
-シンプルなJWT方式を採用：複雑性を避けるためNextAuth.jsは使用せず、Next.jsフロントエンドとNest.js APIで役割を分担。
+シンプルなJWT + Email/パスワード方式を採用。複雑性を避けるためNextAuth.jsは使用せず、Next.jsフロントエンドとNest.js APIで役割を分担。
 
 #### 認証フロー
-1. **初回ログイン**
-   - Next.jsフロントエンドからGoogle OAuth認証画面へリダイレクト
-   - Google認証成功後、Nest.js APIの`/auth/google/callback`へリダイレクト
-   - Nest.js側でユーザー作成/更新、JWT（Access Token）とRefresh Token発行
-   - JWTをHttpOnly Cookieに設定してフロントエンドへリダイレクト
-   - Refresh TokenはDBに暗号化して保存
+1. **新規登録**
+   - Next.jsフロントエンドから登録フォーム（email/password）を送信
+   - Nest.js APIで受信、パスワードをbcryptでハッシュ化してDB保存
+   - メール認証トークンを生成し、確認メールを送信
+   - ユーザーがメール内のリンクをクリックでアカウント有効化
 
-2. **API認証**
+2. **ログイン**
+   - Email/パスワードをNest.js APIに送信
+   - パスワード検証（bcrypt compare）
+   - JWT（Access Token）とRefresh Token発行
+   - JWTをHttpOnly Cookieに設定
+   - Refresh TokenはDBにハッシュ化して保存
+
+3. **パスワードリセット**
+   - メールアドレスを入力してリセット要求
+   - リセット用トークンを生成してメール送信
+   - トークン確認後、新しいパスワードを設定
+
+4. **API認証**
    - すべてのAPI呼び出しでHttpOnly CookieのJWTを自動送信
    - Nest.js側でJWT検証ミドルウェアが認証
    - 有効期限切れの場合はRefresh Tokenで新しいJWTを発行
 
-3. **トークン管理**
+5. **トークン管理**
    - Access Token: HttpOnly Cookieで管理（ブラウザ側）
    - Refresh Token: DBにハッシュ化して保存（サーバー側）
    - ログアウト時はCookieクリアとDBのRefresh Token削除
@@ -90,8 +101,9 @@ User（ユーザー）
 - id: 一意識別子
 - email: メールアドレス（ユニーク）
 - name: 名前
-- googleId: Google OAuth ID（ユニーク）
+- passwordHash: パスワードハッシュ（bcrypt）
 - profileImageUrl: プロフィール画像URL
+- emailVerified: メール認証状態
 - lastLoginAt: 最終ログイン日時
 - isActive: アカウント有効フラグ
 - createdAt/updatedAt: タイムスタンプ
@@ -186,8 +198,10 @@ User（ユーザー）
 - REST API
 - Prisma ORM
 - JWT認証（@nestjs/jwt）
-- Passport.js + Google Strategy（OAuth）
-- crypto（トークン暗号化）
+- Passport.js + Local Strategy（Email/パスワード）
+- bcrypt（パスワードハッシュ化）
+- crypto（トークン生成）
+- nodemailer（メール送信）
 - Bull（ジョブキューイング - レート制御用）
 - Claude API SDK（@anthropic-ai/sdk）
 
@@ -217,7 +231,7 @@ User（ユーザー）
 
 ## MVP実装優先順位
 
-1. Google OAuth認証（Nest.js Passport + JWT）
+1. Email/パスワード認証（Nest.js Passport + JWT + bcrypt）
 2. 基本的なCRUD機能（Project/Function/Variation）
 3. AI生成機能（Claude API、HTML/CSS/JS）
 4. ファイル保存・管理（ハイブリッドストレージ）
@@ -241,8 +255,9 @@ model User {
   id              String    @id @default(cuid())
   email           String    @unique
   name            String?
-  googleId        String    @unique
+  passwordHash    String    // パスワードハッシュを直接保存
   profileImageUrl String?
+  emailVerified   Boolean   @default(false)
   lastLoginAt     DateTime?
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
@@ -251,6 +266,7 @@ model User {
   projects        Project[]
   refreshTokens   RefreshToken[]
   apiUsages       ApiUsage[]
+  verificationTokens VerificationToken[] // メール認証用
 }
 
 // リフレッシュトークン管理
@@ -268,6 +284,22 @@ model RefreshToken {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@index([userId, expiresAt])
+}
+
+// メール認証・パスワードリセット用
+model VerificationToken {
+  id          String    @id @default(cuid())
+  userId      String
+  token       String    @unique
+  type        String    // "email_verification" | "password_reset"
+  expiresAt   DateTime
+  isUsed      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([token, type])
+  @@index([expiresAt])
 }
 
 // API使用状況（レート制御用）

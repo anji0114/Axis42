@@ -8,7 +8,6 @@
 - TypeScript
 - React Query
 - Tailwind CSS
-- Google OAuth (Only)
 
 ### バックエンド
 
@@ -16,8 +15,9 @@
 - TypeScript
 - REST API
 - Prisma (ORM)
-- Google OAuth（Passport.js + Google Strategy）
-- SendMail（通知メールのみ、ユーザー管理には使わない）
+- JWT (アクセストークン/リフレッシュトークン)
+- bcrypt（パスワードハッシュ化）
+- SendMail（メール認証・パスワードリセット用）
 
 ### データベース
 
@@ -41,9 +41,21 @@
 
 ## ✅ 認証設計
 
-- Google OAuth のみ（メール・パスワード登録なし）
-- Nest.js 側で Passport.js + Google Strategy を使い、JWT 発行
-- フロントは JWT を Cookie または localStorage に保存
+### 認証方式
+- **Email + パスワード認証のみ**（Google認証は廃止）
+- メールアドレス確認機能あり
+
+### 実装詳細
+- **JWT ベース認証**
+  - アクセストークン（15分有効）
+  - リフレッシュトークン（7日有効、DBで管理）
+- **パスワード管理**
+  - bcryptでハッシュ化して保存
+  - パスワードリセット機能（メール送信）
+- **セキュリティ**
+  - HTTPOnly Cookie推奨（XSS対策）
+  - リフレッシュトークンはハッシュ化してDB保存
+  - トークン失効機能（ログアウト時）
 
 ---
 
@@ -67,7 +79,6 @@
 │   └── package.json
 ├── api/               # Nest.js (API)
 │   ├── src/
-│   │    ├── auth/   # Google Strategy & Passport
 │   │    ├── dto/    # APIレスポンス用DTO
 │   │    └── ...
 │   ├── prisma/    # Prisma schema & generated client
