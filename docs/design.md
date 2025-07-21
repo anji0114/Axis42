@@ -39,7 +39,12 @@ AIを活用して超高速で「触れるプロトタイプ」を生成するこ
 ### 認証設計
 
 #### 認証方式の選定
-シンプルなJWT + Email/パスワード方式を採用。複雑性を避けるためNextAuth.jsは使用せず、Next.jsフロントエンドとNest.js APIで役割を分担。
+シンプルなJWT + Email/パスワード方式を採用。複雑性を避けるためNextAuth.jsは使用せず、Next.jsフロントエンドとNest.js APIで役割を分担。将来的にGoogle OAuthやGitHub OAuth認証を追加可能な拡張性のある設計とする。
+
+#### 認証プロバイダー戦略
+1. **初期フェーズ**: Email/パスワード認証
+2. **将来拡張**: Google OAuth、GitHub OAuth
+3. **実装方式**: Passport.js + JWT（プロバイダーに依存しない統一的な認証フロー）
 
 #### 認証フロー
 1. **新規登録**
@@ -60,23 +65,31 @@ AIを活用して超高速で「触れるプロトタイプ」を生成するこ
    - リセット用トークンを生成してメール送信
    - トークン確認後、新しいパスワードを設定
 
-4. **API認証**
+4. **プロバイダー拡張設計**
+   - authProviderフィールドで認証方法を識別（'email', 'google', 'github'）
+   - providerIdで外部サービスのユーザーIDを保存（OAuth認証時のみ）
+   - 同一メールアドレスでの複数プロバイダー連携も将来対応可能
+
+5. **API認証**
    - すべてのAPI呼び出しでHttpOnly CookieのJWTを自動送信
    - Nest.js側でJWT検証ミドルウェアが認証
    - 有効期限切れの場合はRefresh Tokenで新しいJWTを発行
 
-5. **トークン管理**
+6. **トークン管理**
    - Access Token: HttpOnly Cookieで管理（ブラウザ側）
    - Refresh Token: DBにハッシュ化して保存（サーバー側）
    - ログアウト時はCookieクリアとDBのRefresh Token削除
 
 #### セキュリティ考慮事項
+- パスワードはbcryptでハッシュ化して保存
 - Refresh Tokenはハッシュ化してDBに保存（復元不可）
 - JWTの有効期限は短め（15分）に設定
 - HttpOnly Cookie使用でXSS対策
 - SameSite Cookie属性でCSRF対策
 - HTTPS通信の強制
 - Refresh Token無効化機能（ログアウト時）
+- メール認証による本人確認
+- パスワードリセット時のトークン有効期限設定
 
 ## データモデル設計
 
@@ -101,6 +114,8 @@ User（ユーザー）
 - id: 一意識別子
 - email: メールアドレス（ユニーク）
 - name: 名前
+- authProvider: 認証プロバイダー（'email', 'google', 'github'）
+- providerId: プロバイダーユーザーID（OAuth認証時のみ）
 - passwordHash: パスワードハッシュ（bcrypt）
 - profileImageUrl: プロフィール画像URL
 - emailVerified: メール認証状態
@@ -199,6 +214,8 @@ User（ユーザー）
 - Prisma ORM
 - JWT認証（@nestjs/jwt）
 - Passport.js + Local Strategy（Email/パスワード）
+- Passport.js + Google OAuth戦略（@nestjs/passport, passport-google-oauth20 - 将来拡張）
+- Passport.js + GitHub OAuth戦略（passport-github2 - 将来拡張）
 - bcrypt（パスワードハッシュ化）
 - crypto（トークン生成）
 - nodemailer（メール送信）
@@ -255,7 +272,9 @@ model User {
   id              String    @id @default(cuid())
   email           String    @unique
   name            String?
-  passwordHash    String    // パスワードハッシュを直接保存
+  authProvider    String    @default("email") // 'email', 'google', 'github'
+  providerId      String?   // OAuth認証時のユーザーID
+  passwordHash    String?   // email認証時のみ使用
   profileImageUrl String?
   emailVerified   Boolean   @default(false)
   lastLoginAt     DateTime?
@@ -267,6 +286,8 @@ model User {
   refreshTokens   RefreshToken[]
   apiUsages       ApiUsage[]
   verificationTokens VerificationToken[] // メール認証用
+  
+  @@unique([authProvider, providerId]) // プロバイダーごとの一意性を保証
 }
 
 // リフレッシュトークン管理
