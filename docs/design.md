@@ -39,57 +39,51 @@ AIを活用して超高速で「触れるプロトタイプ」を生成するこ
 ### 認証設計
 
 #### 認証方式の選定
-シンプルなJWT + Email/パスワード方式を採用。複雑性を避けるためNextAuth.jsは使用せず、Next.jsフロントエンドとNest.js APIで役割を分担。将来的にGoogle OAuthやGitHub OAuth認証を追加可能な拡張性のある設計とする。
+初期フェーズではGoogle OAuth認証のみを実装。複雑性を避けるためNextAuth.jsは使用せず、Passport.js + JWTを使用してNext.jsフロントエンドとNest.js APIで役割を分担。DB設計は将来的なEmail/パスワード認証やGitHub OAuthをすぐに追加できる拡張性を持たせる。
 
 #### 認証プロバイダー戦略
-1. **初期フェーズ**: Email/パスワード認証
-2. **将来拡張**: Google OAuth、GitHub OAuth
+1. **初期実装**: Google OAuthのみ
+2. **将来拡張**（DB設計のみ対応）: Email/パスワード、GitHub OAuth
 3. **実装方式**: Passport.js + JWT（プロバイダーに依存しない統一的な認証フロー）
 
 #### 認証フロー
-1. **新規登録**
-   - Next.jsフロントエンドから登録フォーム（email/password）を送信
-   - Nest.js APIで受信、パスワードをbcryptでハッシュ化してDB保存
-   - メール認証トークンを生成し、確認メールを送信
-   - ユーザーがメール内のリンクをクリックでアカウント有効化
-
-2. **ログイン**
-   - Email/パスワードをNest.js APIに送信
-   - パスワード検証（bcrypt compare）
+1. **Google OAuthログイン（新規登録兼用）**
+   - Next.jsフロントエンドから「Googleでログイン」ボタンをクリック
+   - Nest.js APIのGoogle OAuthエンドポイントへリダイレクト
+   - Googleの認証画面でユーザーが許可
+   - コールバックでGoogleユーザー情報を取得
+   - 初回ログイン時：
+     - Userテーブルに新規レコード作成
+     - OAuthAccountテーブルにGoogleアカウント情報を保存
    - JWT（Access Token）とRefresh Token発行
    - JWTをHttpOnly Cookieに設定
    - Refresh TokenはDBにハッシュ化して保存
 
-3. **パスワードリセット**
-   - メールアドレスを入力してリセット要求
-   - リセット用トークンを生成してメール送信
-   - トークン確認後、新しいパスワードを設定
+2. **DB設計での拡張性**
+   - UserテーブルにはpasswordHashフィールドを保持（将来のパスワード認証用）
+   - OAuthAccountテーブルで複数プロバイダー対応（google, github, discord等）
+   - 同一ユーザーが複数のOAuthプロバイダーを連携可能な設計
 
-4. **プロバイダー拡張設計**
-   - authProviderフィールドで認証方法を識別（'email', 'google', 'github'）
-   - providerIdで外部サービスのユーザーIDを保存（OAuth認証時のみ）
-   - 同一メールアドレスでの複数プロバイダー連携も将来対応可能
-
-5. **API認証**
+3. **API認証**
    - すべてのAPI呼び出しでHttpOnly CookieのJWTを自動送信
    - Nest.js側でJWT検証ミドルウェアが認証
    - 有効期限切れの場合はRefresh Tokenで新しいJWTを発行
 
-6. **トークン管理**
+4. **トークン管理**
    - Access Token: HttpOnly Cookieで管理（ブラウザ側）
    - Refresh Token: DBにハッシュ化して保存（サーバー側）
    - ログアウト時はCookieクリアとDBのRefresh Token削除
 
 #### セキュリティ考慮事項
-- パスワードはbcryptでハッシュ化して保存
+- OAuth stateパラメータによるCSRF対策
+- Google OAuthのスコープを最小限に設定（email, profile）
 - Refresh Tokenはハッシュ化してDBに保存（復元不可）
 - JWTの有効期限は短め（15分）に設定
 - HttpOnly Cookie使用でXSS対策
 - SameSite Cookie属性でCSRF対策
 - HTTPS通信の強制
 - Refresh Token無効化機能（ログアウト時）
-- メール認証による本人確認
-- パスワードリセット時のトークン有効期限設定
+- OAuthトークンの暗号化保存（必要に応じて）
 
 ## データモデル設計
 
@@ -97,6 +91,7 @@ AIを活用して超高速で「触れるプロトタイプ」を生成するこ
 
 ```
 User（ユーザー）
+├── OAuthAccount（OAuthアカウント管理）
 ├── RefreshToken（リフレッシュトークン）
 ├── Project（プロジェクト）
 │   ├── Module（モジュール - 将来実装）
@@ -114,13 +109,23 @@ User（ユーザー）
 - id: 一意識別子
 - email: メールアドレス（ユニーク）
 - name: 名前
-- authProvider: 認証プロバイダー（'email', 'google', 'github'）
-- providerId: プロバイダーユーザーID（OAuth認証時のみ）
-- passwordHash: パスワードハッシュ（bcrypt）
+- passwordHash: パスワードハッシュ（将来のEmail認証用、現在は未使用）
 - profileImageUrl: プロフィール画像URL
-- emailVerified: メール認証状態
 - lastLoginAt: 最終ログイン日時
 - isActive: アカウント有効フラグ
+- createdAt/updatedAt: タイムスタンプ
+
+#### OAuthAccount（OAuthアカウント管理）
+- id: 一意識別子
+- userId: ユーザーID（Userへの外部キー）
+- provider: プロバイダー名（"google", "github", "discord"等）
+- providerId: プロバイダー側のユーザーID
+- email: プロバイダーから取得したメール
+- username: GitHub username等
+- accessToken: アクセストークン（必要に応じて暗号化）
+- refreshToken: リフレッシュトークン
+- expiresAt: トークン有効期限
+- scope: 取得した権限スコープ
 - createdAt/updatedAt: タイムスタンプ
 
 #### RefreshToken（リフレッシュトークン管理）
@@ -213,12 +218,12 @@ User（ユーザー）
 - REST API
 - Prisma ORM
 - JWT認証（@nestjs/jwt）
-- Passport.js + Local Strategy（Email/パスワード）
-- Passport.js + Google OAuth戦略（@nestjs/passport, passport-google-oauth20 - 将来拡張）
-- Passport.js + GitHub OAuth戦略（passport-github2 - 将来拡張）
-- bcrypt（パスワードハッシュ化）
+- Passport.js + Google OAuth戦略（@nestjs/passport, passport-google-oauth20）
+- Passport.js + GitHub OAuth戦略（passport-github2 - 将来拡張用、未実装）
+- Passport.js + Local Strategy（Email/パスワード - 将来拡張用、未実装）
+- bcrypt（パスワードハッシュ化 - 将来拡張用、未実装）
 - crypto（トークン生成）
-- nodemailer（メール送信）
+- nodemailer（メール送信 - 将来拡張用、未実装）
 - Bull（ジョブキューイング - レート制御用）
 - Claude API SDK（@anthropic-ai/sdk）
 
@@ -248,7 +253,7 @@ User（ユーザー）
 
 ## MVP実装優先順位
 
-1. Email/パスワード認証（Nest.js Passport + JWT + bcrypt）
+1. Google OAuth認証（Nest.js Passport + JWT）
 2. 基本的なCRUD機能（Project/Function/Variation）
 3. AI生成機能（Claude API、HTML/CSS/JS）
 4. ファイル保存・管理（ハイブリッドストレージ）
@@ -272,55 +277,63 @@ model User {
   id              String    @id @default(cuid())
   email           String    @unique
   name            String?
-  authProvider    String    @default("email") // 'email', 'google', 'github'
-  providerId      String?   // OAuth認証時のユーザーID
-  passwordHash    String?   // email認証時のみ使用
   profileImageUrl String?
-  emailVerified   Boolean   @default(false)
   lastLoginAt     DateTime?
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   
+  // リレーション
   projects        Project[]
-  refreshTokens   RefreshToken[]
+  refreshTokens   RefreshToken[]  // 長期ログイン維持用
   apiUsages       ApiUsage[]
-  verificationTokens VerificationToken[] // メール認証用
+  oauthAccounts   OAuthAccount[]  // 複数OAuth対応
   
-  @@unique([authProvider, providerId]) // プロバイダーごとの一意性を保証
+  @@map("users")
 }
 
-// リフレッシュトークン管理
+// OAuth アカウント管理（複数プロバイダー対応）
+model OAuthAccount {
+  id           String   @id @default(cuid())
+  userId       String
+  provider     String   // "google" | "github" | "discord" etc
+  providerId   String   // プロバイダー側のユーザーID
+  email        String?  // プロバイダーから取得したメール
+  username     String?  // GitHub username等
+  accessToken  String?  @db.Text // 必要に応じて暗号化
+  refreshToken String?  @db.Text
+  expiresAt    DateTime?
+  scope        String?  // 取得した権限スコープ
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerId])
+  @@unique([userId, provider])  // 1ユーザーにつき1プロバイダー1アカウント
+  @@index([userId])
+  @@index([provider, email])
+  @@map("oauth_accounts")
+}
+
+// JWTのリフレッシュトークン管理
 model RefreshToken {
   id          String    @id @default(cuid())
   userId      String
   tokenHash   String    @unique // ハッシュ化して保存
-  isRevoked   Boolean   @default(false) // 無効化フラグ
-  expiresAt   DateTime
+  isRevoked   Boolean   @default(false)
+  expiresAt   DateTime  // 7日後
   userAgent   String?
   ipAddress   String?
+  lastUsedAt  DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@index([userId, expiresAt])
-}
-
-// メール認証・パスワードリセット用
-model VerificationToken {
-  id          String    @id @default(cuid())
-  userId      String
-  token       String    @unique
-  type        String    // "email_verification" | "password_reset"
-  expiresAt   DateTime
-  isUsed      Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([token, type])
   @@index([expiresAt])
+  @@map("refresh_tokens")
 }
 
 // API使用状況（レート制御用）

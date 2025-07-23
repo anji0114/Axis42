@@ -16,8 +16,9 @@
 - REST API
 - Prisma (ORM)
 - JWT (アクセストークン/リフレッシュトークン)
-- bcrypt（パスワードハッシュ化）
-- SendMail（メール認証・パスワードリセット用）
+- Passport.js + Google OAuth (認証戦略)
+- bcrypt（将来のパスワード認証用、未実装）
+- SendMail（将来のメール認証用、未実装）
 
 ### データベース
 
@@ -42,18 +43,20 @@
 ## ✅ 認証設計
 
 ### 認証方式
-- **初期フェーズ**: Email/パスワード認証
-- **将来拡張**: Google OAuth、GitHub OAuth
-- メールアドレス確認機能あり
+- **初期実装**: Google OAuth認証のみ
+- **将来拡張**（DB設計は対応済）: Email/パスワード、GitHub OAuth
 
 ### 実装詳細
-- **JWT ベース認証**
+- **Google OAuth + JWT**
+  - Passport.jsでGoogle OAuth実装
+  - 認証成功後にJWT発行
   - アクセストークン（15分有効）
   - リフレッシュトークン（7日有効、DBで管理）
-- **パスワード管理**
-  - bcryptでハッシュ化して保存
-  - パスワードリセット機能（メール送信）
+- **DB設計**
+  - OAuthAccountテーブルで複数プロバイダー対応
+  - UserテーブルにpasswordHashフィールドを保持（将来用）
 - **セキュリティ**
+  - OAuth stateパラメータでCSRF対策
   - HTTPOnly Cookie推奨（XSS対策）
   - リフレッシュトークンはハッシュ化してDB保存
   - トークン失効機能（ログアウト時）
@@ -98,7 +101,8 @@
 
 ## ✅ その他ポイント
 
-- メールは SendMail（例: nodemailer + SMTP or SES）
+- Google OAuthクライアントID/シークレットの設定が必要
+- メールは SendMail（将来実装時: nodemailer + SMTP or SES）
 - Prisma migration & seeding は Nest.js 内で管理
 - 初期コストは月 $10〜$60 程度に抑制可能
 - 途中で AWS に移行可能（特にDBとAPI）
