@@ -1,426 +1,392 @@
-# サインアップ機能実装計画書
+# ユーザー登録・認証API設計書
 
 ## 概要
-シンプルなJWT + Email/パスワード方式によるユーザー登録機能を実装します。
-NextAuth.jsは使用せず、Nest.js APIで認証ロジックを実装し、Next.jsフロントエンドと連携します。
+Google OAuth 2.0を使用したユーザー登録・認証システムの設計書。  
+Nest.js、Prisma、Passport、JWTを使用して実装する。
 
-## 認証ストラテジーの選択理由
+## アーキテクチャ
 
-### なぜpassport-localが不要なのか？
-1. **JWTベースの認証システム**
-   - passport-localは主にセッションベース認証で使用される
-   - 今回はJWTトークンベースの認証を採用
-   - ログイン時の認証ロジックは独自実装で十分
+### 技術スタック
+- **Framework**: Nest.js
+- **ORM**: Prisma
+- **認証**: Passport (Google OAuth 2.0)
+- **トークン管理**: JWT (Access Token + Refresh Token)
+- **DB**: PostgreSQL
 
-2. **必要最小限の実装**
-   - passport-jwtのみで認証ガードを実装
-   - 独自のEmail/パスワード検証ロジック
-   - 複雑性を避けシンプルに保つ
-
-3. **将来のOAuth対応を考慮**
-   - passport-localに依存しない設計
-   - 認証プロバイダーを抽象化しやすい構造
-   - プロバイダー別の処理を追加しやすい
-
-## パスワード処理フローの詳細
-
-### 1. サインアップ時のパスワード処理
+### フォルダ構成
 ```
-[ユーザー入力] → [フロントエンド検証] → [HTTPS送信] → [API受信]
-                                                          ↓
-[DB保存] ← [ハッシュ化] ← [ソルト生成] ← [サーバー側検証]
-```
-
-#### 詳細ステップ：
-1. **フロントエンド検証**
-   - 最小8文字
-   - 大文字・小文字・数字を含む
-   - 一般的な弱いパスワードのチェック
-
-2. **HTTPS送信**
-   - 平文パスワードをSSL/TLSで暗号化送信
-   - Content-Type: application/json
-
-3. **サーバー側検証**
-   - DTOによる入力検証（class-validator）
-   - SQLインジェクション対策
-   - パスワード強度の再チェック
-
-4. **bcryptによるハッシュ化**
-   ```typescript
-   const saltRounds = 10; // コスト係数
-   const salt = await bcrypt.genSalt(saltRounds);
-   const passwordHash = await bcrypt.hash(password, salt);
-   ```
-   - ソルトは自動生成（ハッシュに含まれる）
-   - タイミング攻撃対策（処理時間の一定化）
-
-5. **データベース保存**
-   - passwordHashフィールドに保存
-   - 平文パスワードは一切保存しない
-
-### 2. セキュリティ考慮事項
-- **レート制限**: 同一IPからの大量リクエストを制限
-- **アカウントロック**: 連続失敗時の一時的なロック
-- **監査ログ**: 認証試行の記録
-- **エラーメッセージ**: 攻撃者に情報を与えない汎用的なメッセージ
-
-### 3. bcrypt vs argon2の選択理由
-- **bcrypt選択の理由**:
-  - 実績があり安定している
-  - Node.jsエコシステムでの広範な採用
-  - 適切なコスト係数（10-12）で十分なセキュリティ
-  - メモリ使用量が予測可能
-
-- **argon2の利点**（将来的な移行も可能）:
-  - より新しいアルゴリズム（2015年PHC優勝）
-  - メモリハード関数でGPU攻撃に強い
-  - パラメータ調整の柔軟性
-
-### 4. タイミング攻撃対策
-```typescript
-// 悪い例：早期リターンでタイミングが異なる
-if (!user) return unauthorized();
-if (!await bcrypt.compare(password, user.passwordHash)) return unauthorized();
-
-// 良い例：常に同じ処理時間
-const user = await findUser(email);
-const dummyHash = '$2b$10$dummyhash...'; // 事前生成のダミーハッシュ
-const hashToCompare = user ? user.passwordHash : dummyHash;
-const isValid = await bcrypt.compare(password, hashToCompare);
-if (!user || !isValid) return unauthorized();
+src/
+├── auth/                       # 認証関連モジュール
+│   ├── auth.module.ts
+│   ├── auth.service.ts
+│   ├── auth.controller.ts
+│   ├── decorators/
+│   │   ├── current-user.decorator.ts
+│   │   └── public.decorator.ts
+│   ├── dto/
+│   │   ├── auth-response.dto.ts
+│   │   └── refresh-token.dto.ts
+│   ├── guards/
+│   │   ├── google-oauth.guard.ts
+│   │   ├── jwt-auth.guard.ts
+│   │   └── refresh-token.guard.ts
+│   ├── strategies/
+│   │   ├── google.strategy.ts
+│   │   ├── jwt.strategy.ts
+│   │   └── refresh-token.strategy.ts
+│   └── interfaces/
+│       ├── jwt-payload.interface.ts
+│       └── google-user.interface.ts
+├── users/                      # ユーザー管理モジュール
+│   ├── users.module.ts
+│   ├── users.service.ts
+│   ├── users.controller.ts
+│   └── dto/
+│       ├── create-user.dto.ts
+│       └── update-user.dto.ts
+├── common/                     # 共通モジュール
+│   └── decorators/
+│       ├── current-user.decorator.ts
+│       └── public.decorator.ts
+└── prisma/                     # Prismaサービス
+    ├── prisma.module.ts
+    └── prisma.service.ts
 ```
 
-## 将来のOAuth対応を考慮した設計
+## APIエンドポイント
 
-### 1. データベース設計の拡張性
-```prisma
-// 将来的な拡張例
-model User {
-  // 既存フィールド...
-  passwordHash    String?   // OAuthユーザーはnull可
-  authProvider    String    @default("local") // local | google | github
-  
-  // OAuth連携用
-  oauthAccounts   OAuthAccount[]
-}
+### 認証関連
 
-model OAuthAccount {
-  id              String    @id @default(cuid())
-  userId          String
-  provider        String    // google, github, etc
-  providerUserId  String
-  accessToken     String?
-  refreshToken    String?
-  
-  user            User      @relation(fields: [userId], references: [id])
-  
-  @@unique([provider, providerUserId])
-}
+#### 1. Google OAuth認証開始
 ```
-
-### 2. 認証サービスの抽象化
-```typescript
-// 将来的な実装例
-interface AuthProvider {
-  validateUser(credentials: any): Promise<User | null>;
-  createUser(data: any): Promise<User>;
-}
-
-class LocalAuthProvider implements AuthProvider {
-  // Email/パスワード認証
-}
-
-class GoogleAuthProvider implements AuthProvider {
-  // Google OAuth認証
-}
+GET /api/auth/google
 ```
+- Google OAuth認証フローを開始
+- Google認証画面にリダイレクト
 
-## アーキテクチャ概要
+#### 2. Google OAuth コールバック
+```
+GET /api/auth/google/callback
+```
+- Googleからのコールバックを処理
+- 成功時: JWTトークンを生成してフロントエンドにリダイレクト
+- Query Parameters:
+  - `code`: 認証コード
+  - `state`: CSRF対策用のstate
 
-### 認証フロー
-1. **ユーザー登録**
-   - フロントエンド → API: Email/パスワードを送信
-   - API: 詳細なパスワード検証とハッシュ化
-   - API: ユーザー情報をDBに保存
-   - API: JWT（Access Token）とRefresh Tokenを生成
-   - API → フロントエンド: トークンを返却（HttpOnly Cookie）
+#### 3. トークンリフレッシュ
+```
+POST /api/auth/refresh
+```
+- Cookie: `refreshToken` (httpOnly, secure, sameSite=strict)
+- Response: 
+  - 新しいトークンをCookieにセット
+  - Body:
+    ```json
+    {
+      "success": true,
+      "expiresIn": 3600
+    }
+    ```
 
-### トークン戦略
-- **Access Token**: 短命（15分）、ユーザー情報を含むJWT
-- **Refresh Token**: 長命（7日）、DBに保存し無効化可能
+#### 4. ログアウト
+```
+POST /api/auth/logout
+```
+- Cookie: `accessToken`, `refreshToken` (httpOnly cookies)
+- リフレッシュトークンを無効化
+- Cookieをクリア
 
-## 実装ファイル構成
+### ユーザー情報関連
 
-### 新規作成ファイル
+#### 5. 現在のユーザー情報取得
+```
+GET /api/users/me
+```
+- Cookie: `accessToken` (httpOnly, secure, sameSite=strict)
+- Response:
+  ```json
+  {
+    "id": "string",
+    "email": "string",
+    "name": "string",
+    "profileImageUrl": "string",
+    "createdAt": "2024-01-01T00:00:00Z"
+  }
+  ```
 
-#### 1. Prismaサービス
-- `src/prisma/prisma.service.ts` - Prisma Clientのラッパーサービス
-- `src/prisma/prisma.module.ts` - Prismaモジュール定義
+#### 6. ユーザー情報更新
+```
+PATCH /api/users/me
+```
+- Cookie: `accessToken` (httpOnly, secure, sameSite=strict)
+- Request Body:
+  ```json
+  {
+    "name": "string",
+    "profileImageUrl": "string"
+  }
+  ```
 
-#### 2. 認証モジュール
-- `src/auth/auth.module.ts` - 認証モジュール定義
-- `src/auth/auth.controller.ts` - 認証エンドポイント（/auth/signup）
-- `src/auth/auth.service.ts` - 認証ビジネスロジック
+## 認証フロー
 
-#### 3. DTO（Data Transfer Object）
-- `src/auth/dto/signup.dto.ts` - サインアップリクエストの検証
-- `src/auth/dto/auth-response.dto.ts` - 認証レスポンスの型定義
-
-#### 4. Guards & Strategies
-- `src/auth/guards/jwt-auth.guard.ts` - JWT認証ガード
-- `src/auth/strategies/jwt.strategy.ts` - JWT検証戦略
-
-#### 5. インターフェース
-- `src/auth/interfaces/jwt-payload.interface.ts` - JWTペイロードの型定義
-- `src/auth/interfaces/tokens.interface.ts` - トークンの型定義
-
-#### 6. 設定
-- `src/config/jwt.config.ts` - JWT設定（秘密鍵、有効期限等）
-
-### 変更ファイル
-
-#### 1. メインモジュール
-- `src/app.module.ts` - AuthModuleとPrismaModuleをインポート
-
-#### 2. 環境設定
-- `.env` - JWT_SECRET、JWT_REFRESH_SECRET等の環境変数を追加
-
-#### 3. メインファイル
-- `src/main.ts` - ValidationPipeの設定、CORSの設定
-
-## サインアップシーケンスダイアグラム
-
+### 1. 初回登録・ログインフロー
 ```mermaid
 sequenceDiagram
-    participant U as ユーザー
-    participant F as Frontend
-    participant API as NestJS API
-    participant DB as PostgreSQL
-    participant JWT as JWT Service
+    participant Client
+    participant API
+    participant Google
+    participant DB
 
-    U->>F: Email/パスワード入力
-    F->>F: 基本的な検証
-    F->>API: POST /auth/signup
-    API->>API: DTO検証
-    API->>DB: Email重複チェック
-    alt Email既存
-        API-->>F: 409 Conflict
-    else Email新規
-        API->>API: bcrypt.hash(password)
-        API->>DB: ユーザー作成
-        API->>JWT: Access Token生成
-        API->>JWT: Refresh Token生成
-        API->>DB: Refresh Token保存
-        API->>API: Cookie設定
-        API-->>F: 201 Created + Tokens
-        F->>F: ローカルストレージ更新
-        F->>U: ダッシュボードへリダイレクト
+    Client->>API: GET /api/auth/google
+    API->>Google: Redirect to Google OAuth
+    Google->>Client: 認証画面表示
+    Client->>Google: ユーザー認証
+    Google->>API: GET /api/auth/google/callback?code=xxx
+    API->>Google: Exchange code for tokens
+    Google-->>API: Access token & User info
+    
+    alt 新規ユーザー
+        API->>DB: Create User
+        API->>DB: Create OAuthAccount
+    else 既存ユーザー
+        API->>DB: Update lastLoginAt
+        API->>DB: Update OAuthAccount tokens
+    end
+    
+    API->>DB: Create RefreshToken
+    API->>Client: Redirect with Cookies set
+```
+
+### 2. トークンリフレッシュフロー
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant DB
+
+    Client->>API: POST /api/auth/refresh (with Cookie)
+    API->>DB: Validate RefreshToken from Cookie
+    
+    alt 有効なトークン
+        API->>DB: Update lastUsedAt
+        API->>DB: Create new RefreshToken
+        API->>DB: Revoke old RefreshToken
+        API-->>Client: Set new Cookies
+    else 無効なトークン
+        API-->>Client: 401 Unauthorized
     end
 ```
 
-## エラーハンドリング詳細
+## セキュリティ考慮事項
 
-### 1. 入力検証エラー
-```typescript
-// 400 Bad Request
-{
-  "statusCode": 400,
-  "message": [
-    "email must be an email",
-    "password must be longer than or equal to 8 characters"
-  ],
-  "error": "Bad Request"
-}
-```
-
-### 2. Email重複エラー
-```typescript
-// 409 Conflict（セキュリティ上、詳細は隠す）
-{
-  "statusCode": 409,
-  "message": "User registration failed",
-  "error": "Conflict"
-}
-```
-
-### 3. サーバーエラー
-```typescript
-// 500 Internal Server Error
-{
-  "statusCode": 500,
-  "message": "An error occurred during registration",
-  "error": "Internal Server Error"
-}
-```
-
-## 実装詳細
-
-### 1. Prismaサービス
-```typescript
-// src/prisma/prisma.service.ts
-- PrismaClientを拡張
-- 接続管理
-- グローバルプロバイダーとして登録
-```
-
-### 2. 認証サービス
-```typescript
-// src/auth/auth.service.ts
-主要メソッド:
-- signup(email, password): ユーザー登録
-- hashPassword(password): パスワードハッシュ化
-- generateTokens(userId): JWT生成
-- saveRefreshToken(userId, token): リフレッシュトークン保存
-```
-
-### 3. 認証コントローラー
-```typescript
-// src/auth/auth.controller.ts
-エンドポイント:
-- POST /auth/signup
-  - リクエスト: { email, password }
-  - レスポンス: { user, accessToken, refreshToken }
-  - Cookie設定: HttpOnly, Secure, SameSite
-```
-
-### 4. DTO検証
-```typescript
-// src/auth/dto/signup.dto.ts
-export class SignupDto {
-  @IsEmail({}, { message: 'Invalid email format' })
-  @Transform(({ value }) => value.toLowerCase())
-  email: string;
-
-  @IsString()
-  @MinLength(8)
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/,
+### 1. JWT設計
+- **Access Token**
+  - 有効期限: 15分
+  - ペイロード:
+    ```typescript
     {
-      message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
-    },
-  )
-  password: string;
+      sub: string;      // userId
+      email: string;
+      iat: number;
+      exp: number;
+    }
+    ```
 
-  @IsString()
-  @IsOptional()
-  @MinLength(2)
-  @MaxLength(50)
-  name?: string;
+- **Refresh Token**
+  - 有効期限: 7日間
+  - DBにハッシュ化して保存
+  - 1回使用で新しいトークンに置き換え（Rotation）
+
+### 2. セキュリティ対策
+- HTTPS必須
+- CORS設定で許可されたオリジンのみアクセス可能（credentials: true）
+- AccessToken、RefreshTokenともに`httpOnly`、`secure`、`sameSite=strict`のCookieで送信
+- Cookie設定:
+  ```typescript
+  // Access Token Cookie
+  {
+    httpOnly: true,
+    secure: true, // production環境
+    sameSite: 'strict',
+    maxAge: 15 * 60 * 1000, // 15分
+    path: '/'
+  }
+  
+  // Refresh Token Cookie
+  {
+    httpOnly: true,
+    secure: true, // production環境
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7日
+    path: '/api/auth/refresh'
+  }
+  ```
+
+### 3. エラーハンドリング
+- 統一されたエラーレスポンス形式
+- センシティブな情報を含まないエラーメッセージ
+
+## 実装の詳細
+
+### 1. Cookie Parser設定
+```typescript
+// main.ts
+import * as cookieParser from 'cookie-parser';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
+  app.enableCors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  });
+  // ...
 }
 ```
 
-### 5. セキュリティ考慮事項
-- パスワードは必ずハッシュ化（bcrypt使用）
-- JWTの秘密鍵は環境変数で管理
-- リフレッシュトークンはハッシュ化してDBに保存
-- HttpOnly Cookieでトークンを管理
-- CORS設定で許可されたオリジンのみアクセス可能
+### 2. Google Strategy設定
+```typescript
+// auth/strategies/google.strategy.ts
+@Injectable()
+export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
+  constructor(
+    private authService: AuthService,
+    private configService: ConfigService,
+  ) {
+    super({
+      clientID: configService.get('GOOGLE_CLIENT_ID'),
+      clientSecret: configService.get('GOOGLE_CLIENT_SECRET'),
+      callbackURL: configService.get('GOOGLE_CALLBACK_URL'),
+      scope: ['email', 'profile'],
+    });
+  }
 
-## 必要な依存関係
-
-### 既にインストール済み
-- `@nestjs/jwt`: JWT生成・検証
-- `@nestjs/passport`: Passportとの統合
-
-### 追加でインストールが必要
-```bash
-npm install bcrypt class-validator class-transformer passport passport-jwt cookie-parser
-npm install -D @types/bcrypt @types/passport-jwt @types/cookie-parser
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+  ): Promise<any> {
+    return this.authService.validateGoogleUser(profile, accessToken, refreshToken);
+  }
+}
 ```
 
-### 各パッケージの役割
-- **bcrypt**: パスワードのハッシュ化
-- **class-validator**: DTO検証
-- **class-transformer**: リクエストボディの変換
-- **passport & passport-jwt**: JWT認証ストラテジー（passport-localは使用しない）
-- **cookie-parser**: HttpOnly Cookieの処理
+### 3. JWT Strategy (Cookie用)
+```typescript
+// auth/strategies/jwt.strategy.ts
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+  constructor(private configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          return request?.cookies?.accessToken;
+        },
+      ]),
+      ignoreExpiration: false,
+      secretOrKey: configService.get('JWT_ACCESS_SECRET'),
+    });
+  }
+
+  async validate(payload: any) {
+    return { userId: payload.sub, email: payload.email };
+  }
+}
+```
+
+### 4. JWT Guard実装
+```typescript
+// auth/guards/jwt-auth.guard.ts
+@Injectable()
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  constructor(private reflector: Reflector) {
+    super();
+  }
+
+  canActivate(context: ExecutionContext) {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) {
+      return true;
+    }
+    return super.canActivate(context);
+  }
+}
+```
+
+### 5. AuthService主要メソッド
+- `validateGoogleUser`: Googleユーザー情報の検証と登録/更新
+- `generateTokens`: JWT tokens生成とCookie設定
+- `refreshTokens`: トークンリフレッシュ処理
+- `logout`: ログアウト処理（RefreshToken無効化、Cookieクリア）
+- `setTokenCookies`: レスポンスにCookieを設定
 
 ## 環境変数
 ```env
-# JWT設定
-JWT_SECRET=your-super-secret-jwt-key
-JWT_REFRESH_SECRET=your-super-secret-refresh-key
-JWT_EXPIRATION=15m
+# Google OAuth
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+
+# JWT
+JWT_ACCESS_SECRET=
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_SECRET=
 JWT_REFRESH_EXPIRATION=7d
 
-# アプリケーション設定
-FRONTEND_URL=http://localhost:3000
+# Frontend
+FRONTEND_URL=http://localhost:3001
 ```
 
-## テスト計画
-1. ユニットテスト
-   - AuthServiceのメソッドテスト
-   - パスワードハッシュ化のテスト
-   - JWT生成・検証のテスト
 
-2. 統合テスト
-   - サインアップエンドポイントのテスト
-   - 不正なリクエストの検証テスト
-   - トークン発行の確認
+## 実装TODO
 
-## 実装順序
-1. 必要なパッケージのインストール
-2. Prismaサービスの実装
-3. JWT設定の実装
-4. DTOの作成
-5. 認証サービスの実装
-6. 認証コントローラーの実装
-7. ガードとストラテジーの実装
-8. モジュールの統合
-9. テストの実装
-
-## フロントエンドとの連携
-
-### 1. リクエスト例（Next.js）
-```typescript
-const response = await fetch('http://localhost:3300/auth/signup', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  credentials: 'include', // Cookie送信に必要
-  body: JSON.stringify({
-    email: 'user@example.com',
-    password: 'StrongP@ss123',
-    name: 'John Doe'
-  }),
-});
+### 1. 必要なパッケージのインストール
+```bash
+pnpm add @nestjs/passport passport passport-google-oauth20 @nestjs/jwt passport-jwt cookie-parser bcrypt
+pnpm add -D @types/passport @types/passport-google-oauth20 @types/passport-jwt @types/cookie-parser @types/bcrypt
 ```
 
-### 2. Cookie設定詳細
-```typescript
-// src/auth/auth.controller.ts
-response.cookie('access_token', accessToken, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
-  maxAge: 15 * 60 * 1000, // 15分
-});
+### 2. 実装順序
+1. **Prismaセットアップ**
+   - [x] prisma.module.ts作成
+   - [x] prisma.service.ts作成
+   - [x] Prisma migrateの実行
 
-response.cookie('refresh_token', refreshToken, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7日
-  path: '/auth/refresh', // リフレッシュエンドポイントのみ
-});
-```
+2. **共通モジュール**
+   - [] common/decorators/public.decorator.ts
+   - [] common/decorators/current-user.decorator.ts
 
-### 3. CORS設定
-```typescript
-// src/main.ts
-app.enableCors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-});
-```
+3. **Authモジュール基盤**
+   - [] auth.module.ts
+   - [] auth.service.ts
+   - [] auth.controller.ts
+   - [] interfaces/jwt-payload.interface.ts
+   - [] interfaces/google-user.interface.ts
+   - [] dto/auth-response.dto.ts
 
-## 次のステップ（ログイン機能）
-この実装が完了後、以下のログイン機能を追加：
-- POST /auth/login エンドポイント
-- POST /auth/refresh リフレッシュトークン更新
-- POST /auth/logout ログアウト（リフレッシュトークンの無効化）
-- GET /auth/me 現在のユーザー情報取得
+4. **Strategies実装**
+   - [] strategies/google.strategy.ts
+   - [] strategies/jwt.strategy.ts
+   - [] strategies/refresh-token.strategy.ts
+
+5. **Guards実装**
+   - [] guards/google-oauth.guard.ts
+   - [] guards/jwt-auth.guard.ts
+   - [] guards/refresh-token.guard.ts
+
+6. **Usersモジュール**
+   - [] users.module.ts
+   - [] users.service.ts
+   - [] users.controller.ts
+   - [] dto/create-user.dto.ts
+   - [] dto/update-user.dto.ts
+
+7. **メインアプリケーション設定**
+   - [] main.tsにCookie Parser追加
+   - [] main.tsにCORS設定追加
+   - [] app.moduleにグローバルガード設定
+

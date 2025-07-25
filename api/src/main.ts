@@ -7,6 +7,7 @@ async function bootstrap() {
 
   // Cookie parser
   app.use(cookieParser());
+  app.setGlobalPrefix('api');
 
   // Enable CORS for frontend
   app.enableCors({
