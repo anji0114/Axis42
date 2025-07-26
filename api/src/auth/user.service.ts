@@ -53,4 +53,14 @@ export class UserService {
       },
     });
   }
+
+  async findById(userId: string) {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
+    return await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+  }
 }

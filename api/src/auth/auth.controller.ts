@@ -3,10 +3,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { User } from '@prisma/client';
 import { Response } from 'express';
+import { UserService } from './user.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+  ) {}
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
@@ -34,9 +38,30 @@ export class AuthController {
   }
 
   @Get('profile')
-  @UseGuards(AuthGuard('jwt')) // 後で実装
-  getProfile(@Req() req: Request & { user: User }) {
-    return req.user;
+  @UseGuards(AuthGuard('jwt'))
+  async getProfile(
+    @Req()
+    req: Request & { user: { userId: string; email: string; name: string } },
+  ) {
+    const user = req.user as { userId: string; email: string; name: string };
+
+    if (!user.userId) {
+      throw new Error('User ID not found');
+    }
+
+    // DBから最新情報を取得
+    const dbUser = await this.userService.findById(user.userId);
+    if (!dbUser) {
+      throw new Error('User not found');
+    }
+
+    return {
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name,
+      profileImageUrl: dbUser.profileImageUrl,
+      createdAt: dbUser.createdAt,
+    };
   }
 
   @Get('logout')
