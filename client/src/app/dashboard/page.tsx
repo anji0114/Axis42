@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch("http://localhost:3300/api/auth/profile", {
+      const response = await fetch("http://localhost:3300/api/users/me", {
         credentials: "include",
       });
       const data = await response.json();

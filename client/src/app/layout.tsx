@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Noto_Sans } from "next/font/google";
+import { Noto_Sans_JP } from "next/font/google";
 import "@/styles/globals.css";
 
-const notoSans = Noto_Sans({
+const notoSans = Noto_Sans_JP({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });

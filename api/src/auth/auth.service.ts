@@ -8,7 +8,7 @@ export class AuthService {
 
   async login(user: User) {
     const payload = {
-      sub: user.id, // subject: ユーザーID
+      userId: user.id,
       email: user.email,
       name: user.name,
     };

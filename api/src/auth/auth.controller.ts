@@ -3,14 +3,11 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { User } from '@prisma/client';
 import { Response } from 'express';
-import { UserService } from './user.service';
+import { CLIENT_URL } from 'src/common/constatants/urls';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-    private userService: UserService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
@@ -33,40 +30,12 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7日間
     });
 
-    // フロントエンドにリダイレクト
-    res.redirect('http://localhost:3000/dashboard');
-  }
-
-  @Get('profile')
-  @UseGuards(AuthGuard('jwt'))
-  async getProfile(
-    @Req()
-    req: Request & { user: { userId: string; email: string; name: string } },
-  ) {
-    const user = req.user as { userId: string; email: string; name: string };
-
-    if (!user.userId) {
-      throw new Error('User ID not found');
-    }
-
-    // DBから最新情報を取得
-    const dbUser = await this.userService.findById(user.userId);
-    if (!dbUser) {
-      throw new Error('User not found');
-    }
-
-    return {
-      id: dbUser.id,
-      email: dbUser.email,
-      name: dbUser.name,
-      profileImageUrl: dbUser.profileImageUrl,
-      createdAt: dbUser.createdAt,
-    };
+    res.redirect(`${CLIENT_URL}/dashboard`);
   }
 
   @Get('logout')
   logout(@Res() res: Response) {
     res.clearCookie('access_token');
-    res.redirect('http://localhost:3000/login');
+    res.redirect(`${CLIENT_URL}/login`);
   }
 }
