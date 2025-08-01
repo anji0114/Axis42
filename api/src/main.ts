@@ -8,7 +8,9 @@ async function bootstrap() {
 
   // Cookie parser
   app.use(cookieParser());
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', {
+    exclude: ['/'],
+  });
 
   // Enable CORS for frontend
   app.enableCors({
