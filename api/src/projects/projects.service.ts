@@ -19,4 +19,12 @@ export class ProjectsService {
       },
     });
   }
+
+  async getProjects(userId: string): Promise<Project[]> {
+    return this.prisma.project.findMany({
+      where: {
+        userId,
+      },
+    });
+  }
 }

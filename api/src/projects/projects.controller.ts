@@ -5,6 +5,7 @@ import {
   UseGuards,
   Req,
   BadRequestException,
+  Get,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ProjectsService } from './projects.service';
@@ -27,5 +28,11 @@ export class ProjectsController {
     }
 
     return this.projectsService.createProject(req.user.userId, result.data);
+  }
+
+  @Get()
+  @UseGuards(AuthGuard('jwt'))
+  async getProjects(@Req() req: Request & { user: AuthUser }) {
+    return this.projectsService.getProjects(req.user.userId);
   }
 }
