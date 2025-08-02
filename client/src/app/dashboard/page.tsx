@@ -1,18 +1,14 @@
-"use client";
+import { AuthGuard } from "@/components/AuthGuard";
+import { GenelateForm } from "@/features/dashbaord/GenelateForm";
 
-import { useEffect } from "react";
+const DashboardPage = () => {
+  return (
+    <AuthGuard>
+      <div className="min-h-screen flex flex-col p-5 bg-amber-50/50">
+        <GenelateForm />
+      </div>
+    </AuthGuard>
+  );
+};
 
-export default function Dashboard() {
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch("http://localhost:3300/api/users/me", {
-        credentials: "include",
-      });
-      const data = await response.json();
-      console.log(data);
-    };
-    fetchData();
-  }, []);
-
-  return <div>Dashboard</div>;
-}
+export default DashboardPage;

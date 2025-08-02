@@ -16,7 +16,7 @@ export const Hero = () => {
         <div>
           {/* Logo/Brand */}
           <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 bg-gradient-to-br from-amber-300 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Zap className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-amber-500 bg-clip-text text-transparent">

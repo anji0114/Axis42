@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { User } from '@prisma/client';
 import { Response } from 'express';
 import { CLIENT_URL } from 'src/common/constatants/urls';
+import { AuthUser } from 'src/common/types/auth.types';
 
 @Controller('auth')
 export class AuthController {
@@ -37,5 +38,11 @@ export class AuthController {
   logout(@Res() res: Response) {
     res.clearCookie('access_token');
     res.redirect(`${CLIENT_URL}/login`);
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  me(@Req() req: Request & { user: AuthUser }) {
+    return req.user;
   }
 }

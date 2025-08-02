@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Noto_Sans_JP } from "next/font/google";
+import { Noto_Serif } from "next/font/google";
 import "@/styles/globals.css";
+import { QueryProvider } from "@/components/QueryProvider";
 
-const notoSans = Noto_Sans_JP({
+const notoSerif = Noto_Serif({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
@@ -19,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className={`${notoSans.className} bg-primary-50`}>{children}</body>
+      <body className={`${notoSerif.className} bg-amber-50/30`}>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }
