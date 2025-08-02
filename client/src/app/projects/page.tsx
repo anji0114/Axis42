@@ -15,11 +15,14 @@ import { Button } from "@/components/ui/button";
 import { ProjectCreateDialog } from "@/features/projects/ProjectCreateDialog";
 import { useCreateProject } from "@/features/projects/hooks/useCreateProject";
 import { useGetProjects } from "@/features/projects/hooks/useGetProjects";
+import { useRouter } from "next/navigation";
+import { formatDate } from "@/lib/dateUtils";
 
 const ProjectsPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { createProject } = useCreateProject();
   const { data: projects } = useGetProjects();
+  const router = useRouter();
 
   const handleCreateProject = (data: {
     name: string;
@@ -51,13 +54,6 @@ const ProjectsPage = () => {
                 >
                   <CardHeader>
                     <CardTitle className="text-lg">{project.name}</CardTitle>
-                    <CardAction>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
-                      </div>
-                    </CardAction>
                     <CardDescription className="text-sm text-gray-600">
                       {project.description}
                     </CardDescription>
@@ -65,21 +61,21 @@ const ProjectsPage = () => {
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Functions:</span>
-                        <span className="font-medium">{project.createdAt}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Created:</span>
-                        <span>{project.createdAt}</span>
+                        <span>{formatDate(project.createdAt)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Updated:</span>
-                        <span>{project.updatedAt}</span>
+                        <span>{formatDate(project.updatedAt)}</span>
                       </div>
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button className="w-full" variant="outline">
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() => router.push(`/projects/${project.id}`)}
+                    >
                       Open Project
                     </Button>
                   </CardFooter>

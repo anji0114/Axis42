@@ -13,19 +13,24 @@ export const useGetAuth = () => {
 
   useEffect(() => {
     const fetchAuth = async () => {
-      const response = await fetch("http://localhost:3300/api/auth/me", {
-        credentials: "include",
-      });
+      try {
+        const response = await fetch("http://localhost:3300/api/auth/me", {
+          credentials: "include",
+        });
 
-      if (!response.ok) {
+        if (!response.ok) {
+          setIsLoading(false);
+          setError("Failed to fetch auth");
+          return;
+        }
+
+        const data = await response.json();
+        setAuth(data as Auth);
+        setIsLoading(false);
+      } catch (error) {
         setIsLoading(false);
         setError("Failed to fetch auth");
-        return null;
       }
-
-      const data = await response.json();
-      setAuth(data as Auth);
-      setIsLoading(false);
     };
 
     fetchAuth();

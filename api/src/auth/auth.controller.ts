@@ -31,7 +31,7 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7日間
     });
 
-    res.redirect(`${CLIENT_URL}/dashboard`);
+    res.redirect(`${CLIENT_URL}/projects`);
   }
 
   @Get('logout')
