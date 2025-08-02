@@ -13,59 +13,40 @@ import { Button } from "@/components/ui/button";
 import { PageLoading } from "@/components/ui/loading";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/apiClient";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatDate } from "@/lib/dateUtils";
 import Link from "next/link";
+import { FunctionCreateDialog } from "@/features/functions/FunctionCreateDialog";
+import { useState } from "react";
 
 export const ProjectDetail = () => {
   const router = useRouter();
   const { projectId } = useParams() as { projectId: string };
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { mutate: createFunction } = useMutation({
+    mutationFn: async (data: {
+      name: string;
+      description: string | undefined;
+    }) => {
+      const response = await apiClient(`/api/functions`, {
+        method: "POST",
+        body: JSON.stringify({ ...data, projectId }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    },
+    onSuccess: (data: { id: string }) => {
+      setIsDialogOpen(false);
+      router.push(`/projects/${projectId}/functions/${data.id}`);
+    },
+  });
 
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
     queryFn: () => apiClient(`/api/projects/${projectId}`, {}),
   });
-
-  const functions = [
-    {
-      id: "func1",
-      name: "User Authentication",
-      description: "Handle user login and registration",
-      variations: [
-        {
-          id: "var1",
-          name: "Basic Auth",
-          description: "Simple email/password authentication",
-          framework: "react",
-          isActive: true,
-          createdAt: "2024-01-15",
-        },
-        {
-          id: "var2",
-          name: "OAuth Integration",
-          description: "Google and GitHub OAuth",
-          framework: "react",
-          isActive: false,
-          createdAt: "2024-01-16",
-        },
-      ],
-    },
-    {
-      id: "func2",
-      name: "Dashboard Layout",
-      description: "Main dashboard interface",
-      variations: [
-        {
-          id: "var3",
-          name: "Default Layout",
-          description: "Standard dashboard with sidebar",
-          framework: "vanilla",
-          isActive: true,
-          createdAt: "2024-01-17",
-        },
-      ],
-    },
-  ];
 
   if (isLoading || !project) {
     return <PageLoading message="Loading project details..." />;
@@ -90,17 +71,24 @@ export const ProjectDetail = () => {
                 <span>Updated: {formatDate(project.updatedAt)}</span>
               </div>
             </div>
-            <div className="flex gap-2">1
-              <Button>New Function</Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setIsDialogOpen(true)}>
+                New Function
+              </Button>
             </div>
           </div>
         </div>
+        <FunctionCreateDialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          onSubmit={(data) => createFunction(data)}
+        />
 
         {/* Functions List */}
         <div className="space-y-6">
-          {functions.map((func) => (
+          {project.functions.map((func: any) => (
             <Card key={func.id} className="p-6">
-              <CardHeader className="pb-4">
+              <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-xl">{func.name}</CardTitle>
@@ -110,74 +98,17 @@ export const ProjectDetail = () => {
                   </div>
                   <CardAction>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        Edit
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          router.push(`/projects/${projectId}/${func.id}`)
+                        }
+                      >
+                        View Details
                       </Button>
-                      <Button size="sm">New Variation</Button>
                     </div>
                   </CardAction>
-                </div>
-              </CardHeader>
-
-              <CardContent>
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-900">Variations</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {func.variations.map((variation) => (
-                      <Card
-                        key={variation.id}
-                        className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500"
-                      >
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <CardTitle className="text-base flex items-center gap-2">
-                                {variation.name}
-                                {variation.isActive && (
-                                  <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                                    Active
-                                  </span>
-                                )}
-                              </CardTitle>
-                              <CardDescription className="text-sm mt-1">
-                                {variation.description}
-                              </CardDescription>
-                            </div>
-                          </div>
-                        </CardHeader>
-
-                        <CardContent className="pt-0">
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Framework:</span>
-                              <span className="font-medium capitalize">
-                                {variation.framework}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Created:</span>
-                              <span>{variation.createdAt}</span>
-                            </div>
-                          </div>
-                        </CardContent>
-
-                        <CardFooter className="pt-3">
-                          <div className="flex gap-2 w-full">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1"
-                            >
-                              Edit
-                            </Button>
-                            <Button size="sm" className="flex-1">
-                              Preview
-                            </Button>
-                          </div>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -185,7 +116,7 @@ export const ProjectDetail = () => {
         </div>
 
         {/* Empty State */}
-        {functions.length === 0 && (
+        {project.functions.length === 0 && (
           <div className="text-center py-12">
             <div className="max-w-md mx-auto">
               <h3 className="text-lg font-medium text-gray-900 mb-2">

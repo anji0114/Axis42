@@ -34,6 +34,9 @@ export class ProjectsService {
         id,
         userId,
       },
+      include: {
+        functions: true,
+      },
     });
 
     if (!project) {
