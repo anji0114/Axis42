@@ -20,6 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
+      <head>
+        <link rel="icon" href="/favicon.png" />
+      </head>
       <body className={`${notoSerif.className} bg-amber-50/30`}>
         <QueryProvider>{children}</QueryProvider>
       </body>

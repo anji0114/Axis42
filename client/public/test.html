@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProtoRapid - 高速プロトタイプ生成ツール</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary-color: #6366f1;
+        --secondary-color: #8b5cf6;
+        --accent-color: #ec4899;
+        --text-color: #1f2937;
+        --bg-color: #ffffff;
+        --gray-light: #f3f4f6;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        overflow-x: hidden;
+      }
+
+      /* Loading Animation */
+      .loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+
+      .loader.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .loader-circle {
+        width: 50px;
+        height: 50px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Navigation */
+      nav {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        transform: translateY(-100%);
+        animation: slideDown 0.5s ease-out 0.5s forwards;
+      }
+
+      @keyframes slideDown {
+        to {
+          transform: translateY(0);
+        }
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        position: relative;
+      }
+
+      .nav-links a::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary-color);
+        transition: width 0.3s ease;
+      }
+
+      .nav-links a:hover::after {
+        width: 100%;
+      }
+
+      /* Hero Section */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 0 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+        animation: float 20s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        50% {
+          transform: translate(-20px, -20px);
+        }
+      }
+
+      .hero-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-text h1 {
+        font-size: 3.5rem;
+        color: white;
+        margin-bottom: 1rem;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease-out 0.8s forwards;
+      }
+
+      .hero-text p {
+        font-size: 1.25rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 2rem;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease-out 1s forwards;
+      }
+
+      @keyframes fadeInUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .cta-buttons {
+        display: flex;
+        gap: 1rem;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease-out 1.2s forwards;
+      }
+
+      .btn {
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+      }
+
+      .btn-primary {
+        background: white;
+        color: var(--primary-color);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: white;
+        border: 2px solid white;
+      }
+
+      .btn-secondary:hover {
+        background: white;
+        color: var(--primary-color);
+      }
+
+      .hero-visual {
+        position: relative;
+        opacity: 0;
+        transform: scale(0.8);
+        animation: zoomIn 1s ease-out 1.4s forwards;
+      }
+
+      @keyframes zoomIn {
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .floating-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: float-card 6s ease-in-out infinite;
+      }
+
+      @keyframes float-card {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-20px) rotate(2deg);
+        }
+      }
+
+      .code-preview {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 1.5rem;
+        border-radius: 10px;
+        font-family: "Monaco", "Courier New", monospace;
+        font-size: 0.9rem;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .code-line {
+        margin: 0.5rem 0;
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+
+      .code-line:nth-child(1) {
+        animation: slideIn 0.5s ease-out 2s forwards;
+      }
+      .code-line:nth-child(2) {
+        animation: slideIn 0.5s ease-out 2.2s forwards;
+      }
+      .code-line:nth-child(3) {
+        animation: slideIn 0.5s ease-out 2.4s forwards;
+      }
+      .code-line:nth-child(4) {
+        animation: slideIn 0.5s ease-out 2.6s forwards;
+      }
+
+      @keyframes slideIn {
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Features Section */
+      .features {
+        padding: 5rem 2rem;
+        background: var(--gray-light);
+      }
+
+      .features-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .features h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      .features.visible h2 {
+        animation: fadeInUp 0.8s ease-out forwards;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      .features.visible .feature-card:nth-child(1) {
+        animation: fadeInUp 0.8s ease-out 0.2s forwards;
+      }
+      .features.visible .feature-card:nth-child(2) {
+        animation: fadeInUp 0.8s ease-out 0.4s forwards;
+      }
+      .features.visible .feature-card:nth-child(3) {
+        animation: fadeInUp 0.8s ease-out 0.6s forwards;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        color: white;
+      }
+
+      .feature-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--text-color);
+      }
+
+      .feature-card p {
+        color: #6b7280;
+        line-height: 1.8;
+      }
+
+      /* Scroll Indicator */
+      .scroll-indicator {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: bounce 2s ease-in-out infinite;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateX(-50%) translateY(0);
+        }
+        50% {
+          transform: translateX(-50%) translateY(-20px);
+        }
+      }
+
+      .scroll-indicator::before {
+        content: "↓";
+        font-size: 2rem;
+        color: white;
+        opacity: 0.7;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .hero-content {
+          grid-template-columns: 1fr;
+          text-align: center;
+        }
+
+        .hero-text h1 {
+          font-size: 2.5rem;
+        }
+
+        .cta-buttons {
+          justify-content: center;
+        }
+
+        .nav-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+      <div class="loader-circle"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+      <div class="nav-container">
+        <div class="logo">ProtoRapid</div>
+        <ul class="nav-links">
+          <li><a href="#features">機能</a></li>
+          <li><a href="#demo">デモ</a></li>
+          <li><a href="#pricing">料金</a></li>
+          <li><a href="#contact">お問い合わせ</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1>アイデアを瞬時に形に</h1>
+          <p>
+            スタートアップのための高速プロトタイプ生成ツール。共感を生み出し、投資家を魅了するデモを数分で作成。
+          </p>
+          <div class="cta-buttons">
+            <a href="#" class="btn btn-primary">無料で始める</a>
+            <a href="#" class="btn btn-secondary">デモを見る</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="floating-card">
+            <div class="code-preview">
+              <div class="code-line">
+                <span style="color: #569cd6">const</span>
+                <span style="color: #9cdcfe">prototype</span> =
+                <span style="color: #569cd6">new</span>
+                <span style="color: #4ec9b0">ProtoRapid</span>();
+              </div>
+              <div class="code-line">
+                <span style="color: #9cdcfe">prototype</span>.<span
+                  style="color: #dcdcaa"
+                  >create</span
+                >(<span style="color: #ce9178">'landing-page'</span>);
+              </div>
+              <div class="code-line">
+                <span style="color: #9cdcfe">prototype</span>.<span
+                  style="color: #dcdcaa"
+                  >deploy</span
+                >().<span style="color: #dcdcaa">then</span>(() => {
+              </div>
+              <div class="code-line">
+                <span style="color: #9cdcfe">console</span>.<span
+                  style="color: #dcdcaa"
+                  >log</span
+                >(<span style="color: #ce9178">'🚀 Ready to impress!'</span>);
+              </div>
+              <div class="code-line">});</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="scroll-indicator"></div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+      <div class="features-container">
+        <h2>なぜProtoRapidを選ぶのか</h2>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>超高速生成</h3>
+            <p>
+              AIを活用した自動生成で、アイデアから実動するプロトタイプまで数分で完成。時間を大幅に節約できます。
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h3>柔軟なカスタマイズ</h3>
+            <p>
+              複数のバリエーションを瞬時に作成・比較。A/Bテストも簡単に実施でき、最適なデザインを見つけられます。
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔗</div>
+            <h3>即座に共有</h3>
+            <p>
+              ワンクリックで共有可能なURLを生成。投資家やチームメンバーとすぐに共有し、フィードバックを収集できます。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      // Hide loader after page load
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          document.getElementById("loader").classList.add("hidden");
+        }, 500);
+      });
+
+      // Intersection Observer for scroll animations
+      const observerOptions = {
+        threshold: 0.3,
+        rootMargin: "0px 0px -100px 0px",
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      }, observerOptions);
+
+      // Observe features section
+      const featuresSection = document.querySelector(".features");
+      if (featuresSection) {
+        observer.observe(featuresSection);
+      }
+
+      // Smooth scrolling for navigation links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        });
+      });
+
+      // Parallax effect for hero section
+      window.addEventListener("scroll", () => {
+        const scrolled = window.pageYOffset;
+        const hero = document.querySelector(".hero");
+        if (hero) {
+          hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+        }
+      });
+
+      // Add interactive hover effect to feature cards
+      const featureCards = document.querySelectorAll(".feature-card");
+      featureCards.forEach((card) => {
+        card.addEventListener("mouseenter", function () {
+          this.style.transform = "translateY(-10px) scale(1.02)";
+        });
+        card.addEventListener("mouseleave", function () {
+          this.style.transform = "translateY(0) scale(1)";
+        });
+      });
+
+      // Typing effect for hero title (optional enhancement)
+      const heroTitle = document.querySelector(".hero-text h1");
+      if (heroTitle) {
+        const text = heroTitle.textContent;
+        heroTitle.textContent = "";
+        let index = 0;
+
+        setTimeout(() => {
+          const typeWriter = setInterval(() => {
+            if (index < text.length) {
+              heroTitle.textContent += text.charAt(index);
+              index++;
+            } else {
+              clearInterval(typeWriter);
+            }
+          }, 50);
+        }, 1000);
+      }
+    </script>
+  </body>
+</html>

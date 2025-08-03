@@ -1,6 +1,6 @@
 import React from "react";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { ArrowRight, Zap } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { Zap } from "lucide-react";
 import Link from "next/link";
 
 export const Hero = () => {
