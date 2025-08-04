@@ -98,14 +98,12 @@ export const ProjectDetail = () => {
                   </div>
                   <CardAction>
                     <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          router.push(`/projects/${projectId}/${func.id}`)
-                        }
-                      >
-                        View Details
+                      <Button variant="outline" size="sm" asChild>
+                        <Link
+                          href={`/projects/${projectId}/functions/${func.id}`}
+                        >
+                          View Details
+                        </Link>
                       </Button>
                     </div>
                   </CardAction>

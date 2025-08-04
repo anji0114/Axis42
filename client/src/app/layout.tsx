@@ -23,7 +23,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.png" />
       </head>
-      <body className={`${notoSerif.className} bg-amber-50/30`}>
+      <body className={`${notoSerif.className} bg-primary-100`}>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
