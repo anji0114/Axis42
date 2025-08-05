@@ -29,7 +29,12 @@ export class ProjectsController {
       throw new BadRequestException(result.error.issues);
     }
 
-    return this.projectsService.createProject(req.user.userId, result.data);
+    const project = await this.projectsService.createProject(
+      req.user.userId,
+      result.data,
+    );
+
+    return project;
   }
 
   @Get()

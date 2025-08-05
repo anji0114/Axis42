@@ -1,4 +1,5 @@
 import { apiURL } from "@/constants/url";
+import { QUERY_KEY } from "@/constants/queryKey";
 import { useQuery } from "@tanstack/react-query";
 
 type Project = {
@@ -11,7 +12,7 @@ type Project = {
 
 export const useGetProjects = () => {
   const { data, isLoading, error } = useQuery<Project[]>({
-    queryKey: ["projects"],
+    queryKey: [QUERY_KEY.PROJECTS],
     queryFn: async () => {
       const response = await fetch(`${apiURL}/api/projects`, {
         credentials: "include",

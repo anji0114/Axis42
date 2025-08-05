@@ -5,5 +5,5 @@ export const apiClient = async (url: string, options: RequestInit) => {
     ...options,
     credentials: options.credentials || "include",
   });
-  return response.json();
+  return response;
 };

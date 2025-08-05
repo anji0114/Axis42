@@ -4,6 +4,7 @@ import { useGetAuth } from "@/hooks/getAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { LoadingSpinner } from "./ui/loading";
+import { Header } from "./Header";
 
 export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const { auth, isLoading, error } = useGetAuth();
@@ -23,5 +24,10 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  return children;
+  return (
+    <>
+      <Header />
+      <div>{children}</div>
+    </>
+  );
 };

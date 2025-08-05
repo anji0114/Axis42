@@ -1,27 +1,37 @@
-import { apiURL } from "@/constants/url";
-import { useMutation } from "@tanstack/react-query";
+import { QUERY_KEY } from "@/constants/queryKey";
+import { apiClient } from "@/lib/apiClient";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useCreateProject = () => {
+  const queryClient = useQueryClient();
   const {
     mutate: createProject,
     isPending,
     error,
   } = useMutation({
     mutationFn: async (data: { name: string; description: string | null }) => {
-      const response = await fetch(`${apiURL}/api/projects`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
+      console.log("data", data);
+      try {
+        const response = await apiClient(`/api/projects`, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      if (!response.ok) {
-        throw new Error("Failed to create project");
+        console.log("response", response);
+        if (!response.ok) {
+          throw new Error("Failed to create project");
+        }
+
+        return response.json();
+      } catch (error) {
+        console.log("error", error);
       }
-
-      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY.PROJECTS] });
     },
   });
 
