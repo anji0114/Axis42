@@ -10,17 +10,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useCreateVariation } from "./hooks/useCreateValidation";
+import { useParams } from "next/navigation";
 
 export const GenerateForm = () => {
+  const { functionId } = useParams<{ functionId: string }>();
+  const { createVariation } = useCreateVariation();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     prompt: "",
-    framework: "vanilla",
-    aiModel: "claude-3.5-sonnet",
   });
-
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -35,21 +35,16 @@ export const GenerateForm = () => {
   };
 
   const handleGenerateVariation = async (e: React.FormEvent) => {
+    if (!functionId) return;
     e.preventDefault();
-    setIsGenerating(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsGenerating(false);
-      alert("Variation generation would be implemented here!");
-      setFormData({
-        name: "",
-        description: "",
-        prompt: "",
-        framework: "vanilla",
-        aiModel: "claude-3.5-sonnet",
-      });
-    }, 2000);
+    createVariation({
+      isActive: true,
+      framework: "vanilla",
+      aiModel: "claude-3.7-sonnet",
+      functionId: functionId,
+      ...formData,
+    });
   };
 
   return (
@@ -86,38 +81,6 @@ export const GenerateForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="framework">Framework</Label>
-            <select
-              id="framework"
-              name="framework"
-              value={formData.framework}
-              onChange={handleInputChange}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-            >
-              <option value="vanilla">Vanilla JavaScript</option>
-              <option value="react">React</option>
-              <option value="vue">Vue.js</option>
-              <option value="angular">Angular</option>
-              <option value="svelte">Svelte</option>
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="aiModel">AI Model</Label>
-            <select
-              id="aiModel"
-              name="aiModel"
-              value={formData.aiModel}
-              onChange={handleInputChange}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-            >
-              <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-              <option value="gpt-4">GPT-4</option>
-              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-            </select>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="prompt">Generation Prompt</Label>
             <Textarea
               id="prompt"
@@ -130,8 +93,8 @@ export const GenerateForm = () => {
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isGenerating}>
-            {isGenerating ? "Generating..." : "Generate Variation"}
+          <Button type="submit" className="w-full">
+            Generate Variation
           </Button>
         </form>
       </CardContent>

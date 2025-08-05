@@ -10,6 +10,14 @@ import {
 } from './dto/create-variation.dto';
 import { Variation, GeneratedFile } from '@prisma/client';
 
+const testHtml = `  
+<html>
+  <body>
+    <h1>Hello, World!</h1>
+  </body>
+</html>
+`;
+
 @Injectable()
 export class VariationsService {
   constructor(private prisma: PrismaService) {}
@@ -32,16 +40,48 @@ export class VariationsService {
       throw new NotFoundException('Function not found or access denied');
     }
 
-    return this.prisma.variation.create({
-      data: {
-        name: createVariationDto.name,
-        description: createVariationDto.description,
-        functionId: createVariationDto.functionId,
-        prompt: createVariationDto.prompt,
-        aiModel: createVariationDto.aiModel,
-        framework: createVariationDto.framework,
-        isActive: createVariationDto.isActive,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      // バリエーションを作成
+      const variation = await tx.variation.create({
+        data: {
+          name: createVariationDto.name,
+          description: createVariationDto.description,
+          functionId: createVariationDto.functionId,
+          prompt: createVariationDto.prompt,
+          aiModel: createVariationDto.aiModel,
+          framework: createVariationDto.framework,
+          isActive: createVariationDto.isActive,
+        },
+      });
+
+      // ファイルがある場合は生成ファイルも作成
+
+      const files = [
+        {
+          filePath: 'test.html',
+          fileName: 'test.html',
+          content: testHtml,
+          mimeType: 'text/html',
+        },
+      ].map((file) => {
+        const contentBytes = Buffer.byteLength(file.content, 'utf8');
+
+        return {
+          variationId: variation.id,
+          filePath: file.filePath,
+          fileName: file.fileName,
+          content: file.content,
+          fileSize: contentBytes,
+          mimeType: file.mimeType,
+          storageType: 'db',
+        };
+      });
+
+      await tx.generatedFile.createMany({
+        data: files,
+      });
+
+      return variation;
     });
   }
 
