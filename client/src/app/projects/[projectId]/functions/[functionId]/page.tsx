@@ -9,6 +9,7 @@ import { apiClient } from "@/lib/apiClient";
 import { useQuery } from "@tanstack/react-query";
 import { GenerateForm } from "@/features/functions/GenerateForm";
 import { FunctionVariations } from "@/features/functions/FunctionVariations";
+import { QUERY_KEY } from "@/constants/queryKey";
 
 const FunctionDetailPage = () => {
   const router = useRouter();
@@ -18,11 +19,13 @@ const FunctionDetailPage = () => {
   };
 
   const { data: functionData } = useQuery({
-    queryKey: ["function", functionId],
-    queryFn: () =>
-      apiClient(`/api/functions/${functionId}`, {
+    queryKey: [QUERY_KEY.FUNCTION_DETAIL, functionId],
+    queryFn: async () => {
+      const response = await apiClient(`/api/functions/${functionId}`, {
         method: "GET",
-      }),
+      });
+      return response.json();
+    },
   });
 
   if (!functionData) {

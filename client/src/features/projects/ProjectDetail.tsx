@@ -35,7 +35,7 @@ export const ProjectDetail = () => {
           "Content-Type": "application/json",
         },
       });
-      return response.data;
+      return response.json();
     },
     onSuccess: (data: { id: string }) => {
       setIsDialogOpen(false);
@@ -45,7 +45,10 @@ export const ProjectDetail = () => {
 
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
-    queryFn: () => apiClient(`/api/projects/${projectId}`, {}),
+    queryFn: async () => {
+      const response = await apiClient(`/api/projects/${projectId}`, {});
+      return response.json();
+    },
   });
 
   if (isLoading || !project) {
