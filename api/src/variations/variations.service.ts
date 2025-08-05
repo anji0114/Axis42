@@ -102,33 +102,4 @@ export class VariationsService {
 
     return variation;
   }
-
-  async getVariationsByFunction(
-    userId: string,
-    functionId: string,
-  ): Promise<Variation[]> {
-    // 関数が存在し、ユーザーがアクセス権を持っていることを確認
-    const func = await this.prisma.function.findUnique({
-      where: {
-        id: functionId,
-        project: {
-          userId,
-        },
-      },
-    });
-
-    if (!func) {
-      throw new NotFoundException('Function not found or access denied');
-    }
-
-    return this.prisma.variation.findMany({
-      where: {
-        functionId,
-        isActive: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-  }
 }

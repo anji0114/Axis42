@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useCreateVariation } from "./hooks/useCreateValidation";
+import { useCreateVariation } from "./hooks/useCreateVariation";
 import { useParams } from "next/navigation";
 
 export const GenerateForm = () => {

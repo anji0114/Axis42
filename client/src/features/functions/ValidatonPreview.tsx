@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Variation } from "./hooks/useGetFunctionDetail";
 import { formatDate } from "@/lib/dateUtils";
+import { useGetVariationDetail } from "./hooks/useGertVariationDetail";
+import { Loading } from "@/components/ui/loading";
 
 type Props = {
   variation: Variation;
@@ -9,6 +11,18 @@ type Props = {
 };
 
 export const ValidatonPreview = ({ variation, onBack }: Props) => {
+  const {
+    data: validationDetail,
+    isLoading,
+    error,
+  } = useGetVariationDetail(variation.id);
+
+  console.log(validationDetail);
+
+  if (isLoading || !validationDetail) {
+    return <Loading />;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -25,6 +39,18 @@ export const ValidatonPreview = ({ variation, onBack }: Props) => {
           {variation.isActive ? "Active" : "Inactive"}
         </span>
       </div>
+
+      {validationDetail.files.map((file) => (
+        <div key={file.id}>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+            {file.fileName}
+          </h2>
+          <div
+            className="bg-gray-50 p-4 rounded-lg border border-gray-200"
+            dangerouslySetInnerHTML={{ __html: file.content }}
+          />
+        </div>
+      ))}
 
       <div className="space-y-6">
         <div>

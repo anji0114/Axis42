@@ -4,7 +4,6 @@ import {
   Get,
   Body,
   Param,
-  Query,
   UseGuards,
   Req,
   BadRequestException,
@@ -37,20 +36,5 @@ export class VariationsController {
   @UseGuards(AuthGuard('jwt'))
   async getVariation(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.variationsService.getVariation(req.user.userId, id);
-  }
-
-  @Get()
-  @UseGuards(AuthGuard('jwt'))
-  async getVariationsByFunction(
-    @Query('functionId') functionId: string,
-    @Req() req: RequestWithUser,
-  ) {
-    if (!functionId) {
-      throw new BadRequestException('functionId is required');
-    }
-    return this.variationsService.getVariationsByFunction(
-      req.user.userId,
-      functionId,
-    );
   }
 }
