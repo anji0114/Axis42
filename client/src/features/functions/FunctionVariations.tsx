@@ -11,23 +11,16 @@ import {
 import { formatDate } from "@/lib/dateUtils";
 import { useState } from "react";
 import { ValidatonPreview } from "./ValidatonPreview";
+import { Variation } from "./hooks/useGetFunctionDetail";
 
-export const FunctionVariations = () => {
-  const [previewId, setPreviewId] = useState<string | null>(null);
+type Props = {
+  variations: Variation[];
+};
 
-  const variations = [
-    {
-      id: "var1",
-      name: "Basic Auth",
-      description: "Simple email/password authentication",
-      framework: "react",
-      aiModel: "claude-3.5-sonnet",
-      isActive: true,
-      createdAt: "2024-01-15T10:30:00Z",
-      prompt:
-        "Create a basic authentication form with email and password fields...",
-    },
-  ];
+export const FunctionVariations = ({ variations }: Props) => {
+  const [previewVariation, setPreviewVariation] = useState<Variation | null>(
+    null
+  );
 
   return (
     <div className="space-y-6">
@@ -37,8 +30,11 @@ export const FunctionVariations = () => {
         </h2>
       </div>
 
-      {previewId ? (
-        <ValidatonPreview />
+      {previewVariation ? (
+        <ValidatonPreview
+          variation={previewVariation}
+          onBack={() => setPreviewVariation(null)}
+        />
       ) : (
         variations.map((variation) => (
           <Card
@@ -105,13 +101,10 @@ export const FunctionVariations = () => {
 
             <CardFooter>
               <div className="flex gap-2 w-full">
-                <Button variant="outline" size="sm" className="flex-1">
-                  Edit
-                </Button>
                 <Button
                   size="sm"
                   className="flex-1"
-                  onClick={() => setPreviewId(variation.id)}
+                  onClick={() => setPreviewVariation(variation)}
                 >
                   Preview
                 </Button>

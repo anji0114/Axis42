@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFunctionDto } from './dto/create-function.dto';
-import { Function } from '@prisma/client';
+import { Function, Variation } from '@prisma/client';
 
 @Injectable()
 export class FunctionsService {
@@ -32,13 +32,19 @@ export class FunctionsService {
     });
   }
 
-  async getFunction(userId: string, id: string): Promise<Function> {
+  async getFunction(
+    userId: string,
+    id: string,
+  ): Promise<Function & { variations: Variation[] }> {
     const func = await this.prisma.function.findUnique({
       where: {
         id,
         project: {
           userId,
         },
+      },
+      include: {
+        variations: true,
       },
     });
 

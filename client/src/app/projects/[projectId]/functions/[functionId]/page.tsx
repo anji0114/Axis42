@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { GenerateForm } from "@/features/functions/GenerateForm";
 import { FunctionVariations } from "@/features/functions/FunctionVariations";
 import { QUERY_KEY } from "@/constants/queryKey";
+import { useGetFunctionDetail } from "@/features/functions/hooks/useGetFunctionDetail";
 
 const FunctionDetailPage = () => {
   const router = useRouter();
@@ -18,15 +19,7 @@ const FunctionDetailPage = () => {
     functionId: string;
   };
 
-  const { data: functionData } = useQuery({
-    queryKey: [QUERY_KEY.FUNCTION_DETAIL, functionId],
-    queryFn: async () => {
-      const response = await apiClient(`/api/functions/${functionId}`, {
-        method: "GET",
-      });
-      return response.json();
-    },
-  });
+  const { data: functionData } = useGetFunctionDetail(functionId);
 
   if (!functionData) {
     return <PageLoading />;
@@ -68,7 +61,7 @@ const FunctionDetailPage = () => {
             <GenerateForm />
 
             {/* Existing Variations */}
-            <FunctionVariations />
+            <FunctionVariations variations={functionData.variations} />
           </div>
         </div>
       </div>
