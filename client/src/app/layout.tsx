@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
-import { Noto_Serif } from "next/font/google";
+import { Noto_Sans_JP } from "next/font/google";
 import "@/styles/globals.css";
 import { QueryProvider } from "@/components/QueryProvider";
 
-const notoSerif = Noto_Serif({
-  variable: "--font-geist-sans",
+const notoSansJP = Noto_Sans_JP({
+  variable: "--font-noto-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "Vulcan",
-  description: "Vulcan is a platform for creating and managing your business.",
+  title: "Vulcan Engine",
+  description: "Vulcan Engineは、ビジネスのためのプラットフォームです。",
 };
 
 export default function RootLayout({
@@ -23,7 +24,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.png" />
       </head>
-      <body className={`${notoSerif.className} bg-primary-100`}>
+      <body className={`${notoSansJP.className} bg-primary-100`}>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

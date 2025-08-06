@@ -1,7 +1,7 @@
-import { Hero } from "@/features/marketing/Hero";
+import { Lp } from "@/features/marketing/components/Lp";
 
 const Home = () => {
-  return <Hero />;
+  return <Lp />;
 };
 
 export default Home;

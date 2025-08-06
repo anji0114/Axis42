@@ -3,6 +3,7 @@
 import { AuthGuard } from "@/components/AuthGuard";
 import { Button } from "@/components/ui/button";
 import { PageLoading } from "@/components/ui/loading";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useParams, useRouter } from "next/navigation";
 import { formatDate } from "@/lib/dateUtils";
 import { apiClient } from "@/lib/apiClient";
@@ -56,13 +57,20 @@ const FunctionDetailPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Generate New Variation Form */}
-            <GenerateForm />
-
-            {/* Existing Variations */}
-            <FunctionVariations variations={functionData.variations} />
-          </div>
+          <Tabs defaultValue="generate" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="generate">Generate</TabsTrigger>
+              <TabsTrigger value="list">Variations</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="generate" className="mt-6">
+              <GenerateForm />
+            </TabsContent>
+            
+            <TabsContent value="list" className="mt-6">
+              <FunctionVariations variations={functionData.variations} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </AuthGuard>

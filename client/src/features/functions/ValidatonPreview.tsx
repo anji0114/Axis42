@@ -45,72 +45,91 @@ export const ValidatonPreview = ({ variation, onBack }: Props) => {
           <h2 className="text-lg font-semibold text-gray-900 mb-2">
             {file.fileName}
           </h2>
-          <div
-            className="bg-gray-50 p-4 rounded-lg border border-gray-200"
-            dangerouslySetInnerHTML={{ __html: file.content }}
+          <iframe
+            className="bg-gray-50 p-4 rounded-lg border border-gray-200 w-full h-96"
+            srcDoc={file.content}
+            sandbox="allow-scripts allow-same-origin"
+            title={file.fileName}
           />
         </div>
       ))}
 
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="space-y-8">
+        <div className="text-center py-6 border-b border-gray-200">
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">
             {variation.name}
           </h1>
-          <p className="text-gray-600 text-lg">{variation.description}</p>
+          <p className="text-gray-600 text-xl max-w-3xl mx-auto leading-relaxed">
+            {variation.description}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Configuration</CardTitle>
+        <div className="space-y-8">
+          <Card className="shadow-sm">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+              <CardTitle className="text-xl text-gray-800 flex items-center gap-2">
+                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                Configuration
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  AI Model
-                </label>
-                <p className="text-gray-900">{variation.aiModel}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Framework
-                </label>
-                <p className="text-gray-900">{variation.framework}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Status
-                </label>
-                <p className="text-gray-900">
-                  {variation.isActive ? "Active" : "Inactive"}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Created At
-                </label>
-                <p className="text-gray-900">
-                  {formatDate(variation.createdAt)}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Updated At
-                </label>
-                <p className="text-gray-900">
-                  {formatDate(variation.updatedAt)}
-                </p>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                    AI Model
+                  </label>
+                  <div className="bg-blue-50 px-4 py-3 rounded-lg">
+                    <p className="text-gray-900 font-medium">{variation.aiModel}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                    Framework
+                  </label>
+                  <div className="bg-purple-50 px-4 py-3 rounded-lg">
+                    <p className="text-gray-900 font-medium">{variation.framework}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                    Status
+                  </label>
+                  <div className={`px-4 py-3 rounded-lg ${variation.isActive ? 'bg-green-50' : 'bg-gray-50'}`}>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${variation.isActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <p className="text-gray-900 font-medium">
+                        {variation.isActive ? "Active" : "Inactive"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                    Last Updated
+                  </label>
+                  <div className="bg-orange-50 px-4 py-3 rounded-lg">
+                    <p className="text-gray-900 font-medium">
+                      {formatDate(variation.updatedAt)}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Created: {formatDate(variation.createdAt)}
+                    </p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Prompt</CardTitle>
+          
+          <Card className="shadow-sm">
+            <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+              <CardTitle className="text-xl text-gray-800 flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                Prompt
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
+            <CardContent className="p-6">
+              <div className="bg-gray-900 p-4 rounded-lg max-h-96 overflow-y-auto">
+                <pre className="whitespace-pre-wrap text-sm text-gray-100 font-mono leading-relaxed">
                   {variation.prompt}
                 </pre>
               </div>
