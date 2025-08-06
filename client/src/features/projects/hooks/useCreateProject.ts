@@ -10,7 +10,6 @@ export const useCreateProject = () => {
     error,
   } = useMutation({
     mutationFn: async (data: { name: string; description: string | null }) => {
-      console.log("data", data);
       try {
         const response = await apiClient(`/api/projects`, {
           method: "POST",
@@ -20,7 +19,6 @@ export const useCreateProject = () => {
           },
         });
 
-        console.log("response", response);
         if (!response.ok) {
           throw new Error("Failed to create project");
         }

@@ -2,7 +2,7 @@ import { apiURL } from "@/constants/url";
 import { QUERY_KEY } from "@/constants/queryKey";
 import { useQuery } from "@tanstack/react-query";
 
-type Project = {
+export type Project = {
   id: string;
   name: string;
   description: string;

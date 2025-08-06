@@ -7,6 +7,7 @@ import {
   BadRequestException,
   Get,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ProjectsService } from './projects.service';
@@ -47,5 +48,11 @@ export class ProjectsController {
   @UseGuards(AuthGuard('jwt'))
   async getProject(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.projectsService.getProject(req.user.userId, id);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
+  async deleteProject(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return this.projectsService.deleteProject(req.user.userId, id);
   }
 }

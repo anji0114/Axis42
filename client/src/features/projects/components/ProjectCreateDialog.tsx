@@ -12,21 +12,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useCreateProject } from "../hooks/useCreateProject";
 
 interface ProjectCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit?: (data: { name: string; description: string | null }) => void;
 }
 
 export const ProjectCreateDialog = ({
   open,
   onOpenChange,
-  onSubmit,
 }: ProjectCreateDialogProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { createProject } = useCreateProject();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,21 +35,22 @@ export const ProjectCreateDialog = ({
 
     setIsSubmitting(true);
 
-    try {
-      onSubmit?.({
-        name: name.trim(),
-        description: description.trim() || null,
-      });
-
-      // Reset form and close dialog on success
-      setName("");
-      setDescription("");
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Failed to create project:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    createProject(
+      { name: name.trim(), description: description.trim() },
+      {
+        onSuccess: () => {
+          setName("");
+          setDescription("");
+          onOpenChange(false);
+        },
+        onError: (error) => {
+          console.error("Failed to create project:", error);
+        },
+        onSettled: () => {
+          setIsSubmitting(false);
+        },
+      }
+    );
   };
 
   const handleCancel = () => {
@@ -60,30 +61,32 @@ export const ProjectCreateDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
+          <DialogTitle>新しいプロジェクトを作成</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Project Name *</Label>
+            <Label htmlFor="name">
+              プロジェクト名 <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter project name"
+              placeholder="プロジェクト名を入力"
               required
               disabled={isSubmitting}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">説明</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter project description (optional)"
-              rows={3}
+              placeholder="プロジェクトの説明を入力（任意）"
+              className="min-h-28 max-h-48"
               disabled={isSubmitting}
             />
           </div>
@@ -94,10 +97,10 @@ export const ProjectCreateDialog = ({
               onClick={handleCancel}
               disabled={isSubmitting}
             >
-              Cancel
+              キャンセル
             </Button>
             <Button type="submit" disabled={!name.trim() || isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Project"}
+              {isSubmitting ? "作成中..." : "プロジェクト作成"}
             </Button>
           </DialogFooter>
         </form>

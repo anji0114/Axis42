@@ -4,10 +4,8 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
   CardAction,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageLoading } from "@/components/ui/loading";
@@ -52,7 +50,7 @@ export const ProjectDetail = () => {
   });
 
   if (isLoading || !project) {
-    return <PageLoading message="Loading project details..." />;
+    return <PageLoading message="プロジェクト詳細を読み込み中..." />;
   }
 
   return (
@@ -63,21 +61,19 @@ export const ProjectDetail = () => {
           <div className="flex items-center justify-between">
             <div>
               <Button variant="ghost" size="sm" className="mb-2" asChild>
-                <Link href="/projects">← Back to Projects</Link>
+                <Link href="/projects">← プロジェクト一覧に戻る</Link>
               </Button>
               <h1 className="text-3xl font-bold text-gray-900">
                 {project.name}
               </h1>
               <p className="text-gray-600 mt-2">{project.description}</p>
               <div className="flex gap-4 mt-4 text-sm text-gray-500">
-                <span>Created: {formatDate(project.createdAt)}</span>
-                <span>Updated: {formatDate(project.updatedAt)}</span>
+                <span>作成日: {formatDate(project.createdAt)}</span>
+                <span>更新日: {formatDate(project.updatedAt)}</span>
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => setIsDialogOpen(true)}>
-                New Function
-              </Button>
+              <Button onClick={() => setIsDialogOpen(true)}>新しい関数</Button>
             </div>
           </div>
         </div>
@@ -105,7 +101,7 @@ export const ProjectDetail = () => {
                         <Link
                           href={`/projects/${projectId}/functions/${func.id}`}
                         >
-                          View Details
+                          詳細を見る
                         </Link>
                       </Button>
                     </div>
@@ -115,23 +111,6 @@ export const ProjectDetail = () => {
             </Card>
           ))}
         </div>
-
-        {/* Empty State */}
-        {project.functions.length === 0 && (
-          <div className="text-center py-12">
-            <div className="max-w-md mx-auto">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No functions yet
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Create your first function to get started with this project
-              </p>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                Create Function
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

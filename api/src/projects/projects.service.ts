@@ -25,6 +25,9 @@ export class ProjectsService {
       where: {
         userId,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -44,5 +47,14 @@ export class ProjectsService {
     }
 
     return project;
+  }
+
+  async deleteProject(userId: string, id: string): Promise<void> {
+    await this.prisma.project.delete({
+      where: {
+        id,
+        userId,
+      },
+    });
   }
 }
