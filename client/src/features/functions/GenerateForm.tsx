@@ -15,7 +15,7 @@ import { useParams } from "next/navigation";
 
 export const GenerateForm = () => {
   const { functionId } = useParams<{ functionId: string }>();
-  const { createVariation } = useCreateVariation();
+  const { createVariation, isPending } = useCreateVariation();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -41,7 +41,7 @@ export const GenerateForm = () => {
     createVariation({
       isActive: true,
       framework: "vanilla",
-      aiModel: "claude-3.7-sonnet",
+      aiModel: "claude-sonnet-4-20250514",
       functionId: functionId,
       ...formData,
     });
@@ -50,19 +50,19 @@ export const GenerateForm = () => {
   return (
     <Card className="h-fit">
       <CardHeader>
-        <CardTitle>Generate New Variation</CardTitle>
+        <CardTitle>新しいバリエーションを生成</CardTitle>
         <CardDescription>
-          Use AI to generate a new variation of this function
+          AIを使用してこの関数の新しいバリエーションを生成します
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleGenerateVariation} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Variation Name</Label>
+            <Label htmlFor="name">バリエーション名</Label>
             <Input
               id="name"
               name="name"
-              placeholder="e.g., OAuth with Google"
+              placeholder="例: Googleでの認証"
               value={formData.name}
               onChange={handleInputChange}
               required
@@ -70,22 +70,22 @@ export const GenerateForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">説明</Label>
             <Input
               id="description"
               name="description"
-              placeholder="Brief description of this variation"
+              placeholder="このバリエーションの簡潔な説明"
               value={formData.description}
               onChange={handleInputChange}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="prompt">Generation Prompt</Label>
+            <Label htmlFor="prompt">生成プロンプト</Label>
             <Textarea
               id="prompt"
               name="prompt"
-              placeholder="Describe what you want to generate. Be specific about features, styling, and behavior..."
+              placeholder="生成したい内容を記述してください。機能、スタイル、動作について具体的に..."
               value={formData.prompt}
               onChange={handleInputChange}
               rows={6}
@@ -93,8 +93,8 @@ export const GenerateForm = () => {
             />
           </div>
 
-          <Button type="submit" className="w-full">
-            Generate Variation
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "生成中..." : "バリエーションを生成"}
           </Button>
         </form>
       </CardContent>

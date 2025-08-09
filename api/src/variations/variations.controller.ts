@@ -20,7 +20,6 @@ interface RequestWithUser extends Request {
 @Controller('variations')
 export class VariationsController {
   constructor(private variationsService: VariationsService) {}
-
   @Post()
   @UseGuards(AuthGuard('jwt'))
   async createVariation(@Body() body: any, @Req() req: RequestWithUser) {

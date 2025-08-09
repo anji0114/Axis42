@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { VariationsController } from './variations.controller';
 import { VariationsService } from './variations.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AnthropicModule } from '../anthropic/anthropic.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AnthropicModule],
   controllers: [VariationsController],
   providers: [VariationsService],
   exports: [VariationsService],

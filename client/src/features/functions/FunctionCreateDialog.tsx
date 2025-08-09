@@ -62,27 +62,27 @@ export const FunctionCreateDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Function</DialogTitle>
+          <DialogTitle>新しい関数を作成</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Function Name *</Label>
+            <Label htmlFor="name">関数名 *</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter function name"
+              placeholder="関数名を入力"
               required
               disabled={isSubmitting}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">説明</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter function description (optional)"
+              placeholder="関数の説明を入力（任意）"
               rows={3}
               disabled={isSubmitting}
             />
@@ -94,10 +94,10 @@ export const FunctionCreateDialog = ({
               onClick={handleCancel}
               disabled={isSubmitting}
             >
-              Cancel
+              キャンセル
             </Button>
             <Button type="submit" disabled={!name.trim() || isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create function"}
+              {isSubmitting ? "作成中..." : "関数を作成"}
             </Button>
           </DialogFooter>
         </form>

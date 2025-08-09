@@ -40,27 +40,27 @@ const FunctionDetailPage = () => {
                   onClick={() => router.push(`/projects/${projectId}`)}
                   className="mb-2"
                 >
-                  ← Back to Project
+                  ← プロジェクトに戻る
                 </Button>
                 <h1 className="text-3xl font-bold text-gray-900">
                   {functionData.name}
                 </h1>
                 <p className="text-gray-600 mt-2">{functionData.description}</p>
                 <div className="flex gap-4 mt-4 text-sm text-gray-500">
-                  <span>Created: {formatDate(functionData.createdAt)}</span>
-                  <span>Updated: {formatDate(functionData.updatedAt)}</span>
+                  <span>作成日: {formatDate(functionData.createdAt)}</span>
+                  <span>更新日: {formatDate(functionData.updatedAt)}</span>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline">Edit Function</Button>
+                <Button variant="outline">関数を編集</Button>
               </div>
             </div>
           </div>
 
           <Tabs defaultValue="generate" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="generate">Generate</TabsTrigger>
-              <TabsTrigger value="list">Variations</TabsTrigger>
+              <TabsTrigger value="generate">生成</TabsTrigger>
+              <TabsTrigger value="list">バリエーション</TabsTrigger>
             </TabsList>
             
             <TabsContent value="generate" className="mt-6">

@@ -27,7 +27,7 @@ export const ValidatonPreview = ({ variation, onBack }: Props) => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button onClick={onBack} variant="outline">
-          ← View List
+          ← リストを表示
         </Button>
         <span
           className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -36,7 +36,7 @@ export const ValidatonPreview = ({ variation, onBack }: Props) => {
               : "bg-gray-100 text-gray-800"
           }`}
         >
-          {variation.isActive ? "Active" : "Inactive"}
+          {variation.isActive ? "アクティブ" : "非アクティブ"}
         </span>
       </div>
 
@@ -46,7 +46,7 @@ export const ValidatonPreview = ({ variation, onBack }: Props) => {
             {file.fileName}
           </h2>
           <iframe
-            className="bg-gray-50 p-4 rounded-lg border border-gray-200 w-full h-96"
+            className="bg-gray-50 p-4 rounded-lg border border-gray-200 w-full h-screen"
             srcDoc={file.content}
             sandbox="allow-scripts allow-same-origin"
             title={file.fileName}
@@ -69,62 +69,74 @@ export const ValidatonPreview = ({ variation, onBack }: Props) => {
             <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
               <CardTitle className="text-xl text-gray-800 flex items-center gap-2">
                 <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                Configuration
+                設定
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-                    AI Model
+                    AIモデル
                   </label>
                   <div className="bg-blue-50 px-4 py-3 rounded-lg">
-                    <p className="text-gray-900 font-medium">{variation.aiModel}</p>
+                    <p className="text-gray-900 font-medium">
+                      {variation.aiModel}
+                    </p>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-                    Framework
+                    フレームワーク
                   </label>
                   <div className="bg-purple-50 px-4 py-3 rounded-lg">
-                    <p className="text-gray-900 font-medium">{variation.framework}</p>
+                    <p className="text-gray-900 font-medium">
+                      {variation.framework}
+                    </p>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
+                    ステータス
                   </label>
-                  <div className={`px-4 py-3 rounded-lg ${variation.isActive ? 'bg-green-50' : 'bg-gray-50'}`}>
+                  <div
+                    className={`px-4 py-3 rounded-lg ${
+                      variation.isActive ? "bg-green-50" : "bg-gray-50"
+                    }`}
+                  >
                     <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${variation.isActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          variation.isActive ? "bg-green-500" : "bg-gray-400"
+                        }`}
+                      ></div>
                       <p className="text-gray-900 font-medium">
-                        {variation.isActive ? "Active" : "Inactive"}
+                        {variation.isActive ? "アクティブ" : "非アクティブ"}
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-                    Last Updated
+                    最終更新
                   </label>
                   <div className="bg-orange-50 px-4 py-3 rounded-lg">
                     <p className="text-gray-900 font-medium">
                       {formatDate(variation.updatedAt)}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      Created: {formatDate(variation.createdAt)}
+                      作成日: {formatDate(variation.createdAt)}
                     </p>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="shadow-sm">
             <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
               <CardTitle className="text-xl text-gray-800 flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Prompt
+                プロンプト
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">

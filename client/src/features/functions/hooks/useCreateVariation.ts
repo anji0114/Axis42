@@ -12,7 +12,7 @@ interface Variation {
 }
 
 export const useCreateVariation = () => {
-  const { mutate: createVariation } = useMutation({
+  const { mutate: createVariation, isPending } = useMutation({
     mutationFn: async (data: Variation) => {
       const response = await apiClient(`/api/variations`, {
         method: "POST",
@@ -28,5 +28,5 @@ export const useCreateVariation = () => {
     },
   });
 
-  return { createVariation };
+  return { createVariation, isPending };
 };

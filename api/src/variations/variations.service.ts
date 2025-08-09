@@ -1,19 +1,49 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { AnthropicService } from '../anthropic/anthropic.service';
 import { CreateVariationDto } from './dto/create-variation.dto';
 import { Variation, GeneratedFile } from '@prisma/client';
 
-const testHtml = `  
-<html>
-  <body>
-    <h1>Hello, World!</h1>
-  </body>
-</html>
-`;
+const createPrompt = (prompt: string) => {
+  return `HTMLのみを生成してください。以下の要件を満たしてください：
+
+1. <html>タグで囲うこと
+2. CSS、JavaScriptは<html>タグ内に記述すること（<style>タグや<script>タグを使用）
+3. 完全なHTMLドキュメントとして生成すること
+4. レスポンシブデザインを考慮すること
+
+ユーザーからの要求：
+${prompt}
+
+注意：HTMLコード以外は一切出力しないでください。説明文やマークダウンのコードブロック記法も不要です。`;
+};
+
+const validateHtmlContent = (content: string): void => {
+  const trimmedContent = content.trim();
+
+  if (!trimmedContent.startsWith('<html')) {
+    throw new BadRequestException(
+      'Generated content must start with <html> tag',
+    );
+  }
+
+  if (!trimmedContent.endsWith('</html>')) {
+    throw new BadRequestException(
+      'Generated content must end with </html> tag',
+    );
+  }
+};
 
 @Injectable()
 export class VariationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private anthropicService: AnthropicService,
+  ) {}
 
   async createVariation(
     userId: string,
@@ -33,6 +63,15 @@ export class VariationsService {
       throw new NotFoundException('Function not found or access denied');
     }
 
+    // Anthropic APIを使用してcontentを生成（トランザクション外）
+    const generatedContent = await this.anthropicService.createMessage(
+      createPrompt(createVariationDto.prompt),
+      createVariationDto.aiModel || 'claude-3-haiku-20240307',
+    );
+
+    // 生成されたcontentをバリデーション
+    validateHtmlContent(generatedContent);
+
     return this.prisma.$transaction(async (tx) => {
       // バリエーションを作成
       const variation = await tx.variation.create({
@@ -47,13 +86,12 @@ export class VariationsService {
         },
       });
 
-      // ファイルがある場合は生成ファイルも作成
-
+      // 生成されたcontentでファイルを作成
       const files = [
         {
-          filePath: 'test.html',
-          fileName: 'test.html',
-          content: testHtml,
+          filePath: 'generated.html',
+          fileName: 'generated.html',
+          content: generatedContent,
           mimeType: 'text/html',
         },
       ].map((file) => {
