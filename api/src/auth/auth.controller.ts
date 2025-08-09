@@ -3,8 +3,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { User } from '@prisma/client';
 import { Response } from 'express';
-import { CLIENT_URL } from 'src/common/constatants/urls';
-import { AuthUser } from 'src/common/types/auth.types';
+import { CLIENT_URL } from 'src/shared/constants/urls';
+import { AuthUser } from 'src/shared/types/auth.types';
 
 @Controller('auth')
 export class AuthController {
