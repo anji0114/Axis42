@@ -19,7 +19,7 @@ export const Lp = () => {
             <div className="w-12 h-12 bg-gradient-to-br from-amber-300 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Zap className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-amber-500 bg-clip-text text-transparent py-1">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-amber-500 bg-clip-text text-transparent py-1 font-roboto">
               Vulcan Engine
             </h1>
           </div>

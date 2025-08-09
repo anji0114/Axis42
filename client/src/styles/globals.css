@@ -118,3 +118,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.font-roboto {
+  font-family: var(--font-roboto);
+}

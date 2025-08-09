@@ -3,7 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../core/database/prisma/prisma.service';
 import { AnthropicService } from '../anthropic/anthropic.service';
 import { CreateVariationDto } from './dto/create-variation.dto';
 import { Variation, GeneratedFile } from '@prisma/client';

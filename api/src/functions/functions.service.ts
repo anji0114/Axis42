@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../core/database/prisma/prisma.service';
 import { CreateFunctionDto } from './dto/create-function.dto';
 import { Function, Variation } from '@prisma/client';
 
