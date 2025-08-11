@@ -60,13 +60,13 @@ export function formatRelativeTime(dateString: string): string {
   const diffInDays = Math.floor(diffInHours / 24);
 
   if (diffInDays > 0) {
-    return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+    return `${diffInDays}日前`;
   } else if (diffInHours > 0) {
-    return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    return `${diffInHours}時間前`;
   } else if (diffInMinutes > 0) {
-    return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+    return `${diffInMinutes}分前`;
   } else {
-    return "Just now";
+    return "たった今";
   }
 }
 
@@ -82,7 +82,7 @@ export function formatDateHuman(dateString: string): string {
     return dateString;
   }
 
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "short",
     day: "numeric",

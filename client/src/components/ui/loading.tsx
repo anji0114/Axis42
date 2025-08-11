@@ -34,7 +34,7 @@ interface LoadingProps {
 }
 
 export function Loading({
-  message = "Loading...",
+  message = "読み込み中...",
   size = "md",
   className,
 }: LoadingProps) {
@@ -57,7 +57,7 @@ interface PageLoadingProps {
   message?: string;
 }
 
-export function PageLoading({ message = "Loading..." }: PageLoadingProps) {
+export function PageLoading({ message = "読み込み中..." }: PageLoadingProps) {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Loading message={message} size="lg" />

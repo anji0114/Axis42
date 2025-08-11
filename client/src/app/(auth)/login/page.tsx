@@ -27,7 +27,7 @@ const SignupPage = () => {
             {/* Welcome メッセージ */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-2 font-roboto">
-                Welcome to Vulcan
+                Vulcanへようこそ
               </h1>
               <p className="text-gray-600 text-lg">
                 AI駆動型SaaSプロトタイピングプラットフォーム
