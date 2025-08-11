@@ -24,7 +24,7 @@ export const useCreateVariation = () => {
       return response.json();
     },
     onError: (error) => {
-      alert("error");
+      alert("エラーが発生しました");
     },
   });
 

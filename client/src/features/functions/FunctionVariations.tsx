@@ -68,19 +68,19 @@ export const FunctionVariations = ({ variations }: Props) => {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Framework:</span>
+                    <span className="text-gray-500">フレームワーク：</span>
                     <span className="font-medium capitalize">
                       {variation.framework}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">AI Model:</span>
+                    <span className="text-gray-500">AIモデル：</span>
                     <span className="font-medium">{variation.aiModel}</span>
                   </div>
                 </div>
 
                 <div className="text-sm">
-                  <span className="text-gray-500">Created:</span>
+                  <span className="text-gray-500">作成日：</span>
                   <span className="ml-2">
                     {formatDate(variation.createdAt)}
                   </span>
@@ -106,7 +106,7 @@ export const FunctionVariations = ({ variations }: Props) => {
                   className="flex-1"
                   onClick={() => setPreviewVariation(variation)}
                 >
-                  Preview
+                  プレビュー
                 </Button>
               </div>
             </CardFooter>
