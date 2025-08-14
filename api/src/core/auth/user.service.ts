@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma/prisma.service';
-import { GoogleProfile } from 'src/types/googleProfile';
+import { GoogleProfile } from 'src/shared/types/googleProfile';
 
 @Injectable()
 export class UserService {

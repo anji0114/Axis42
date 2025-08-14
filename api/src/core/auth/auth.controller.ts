@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req, Res } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Res, Post } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { User } from '@prisma/client';
@@ -44,5 +44,17 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   me(@Req() req: Request & { user: AuthUser }) {
     return req.user;
+  }
+  // postman用ログイン
+  @Post('postman-login')
+  login(@Res({ passthrough: true }) res: Response) {
+    // accsess_tokenを自分でセットする
+    res.cookie('access_token', process.env.ACCESS_TOKEN, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7日間
+    });
+    return { ok: true };
   }
 }
