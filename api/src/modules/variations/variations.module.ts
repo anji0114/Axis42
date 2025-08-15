@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { VariationsController } from './variations.controller';
 import { VariationsService } from './variations.service';
-import { PrismaModule } from '../core/database/prisma/prisma.module';
-import { AnthropicModule } from '../anthropic/anthropic.module';
+import { PrismaModule } from '@/core/database/prisma/prisma.module';
+import { AnthropicModule } from '@/modules/anthropic/anthropic.module';
 
 @Module({
   imports: [PrismaModule, AnthropicModule],

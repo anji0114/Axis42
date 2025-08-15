@@ -12,7 +12,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ProjectsService } from './projects.service';
 import { createProjectSchema } from './dto/create-project.dto';
-import { AuthUser } from '../shared/types/auth.types';
+import { AuthUser } from '@/shared/types/auth.types';
 
 interface RequestWithUser extends Request {
   user: AuthUser;

@@ -11,7 +11,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { VariationsService } from './variations.service';
 import { createVariationSchema } from './dto/create-variation.dto';
-import { AuthUser } from '../shared/types/auth.types';
+import { AuthUser } from '@/shared/types/auth.types';
 
 interface RequestWithUser extends Request {
   user: AuthUser;

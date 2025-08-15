@@ -11,7 +11,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { FunctionsService } from './functions.service';
 import { createFunctionSchema } from './dto/create-function.dto';
-import { AuthUser } from '../shared/types/auth.types';
+import { AuthUser } from '@/shared/types/auth.types';
 
 interface RequestWithUser extends Request {
   user: AuthUser;
