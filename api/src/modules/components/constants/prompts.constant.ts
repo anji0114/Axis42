@@ -10,7 +10,8 @@ export const PROMPT_TEMPLATES = {
     currentContent: string,
     framework: string,
   ) => `以下のHTMLコードを修正してください：
-
+ユーザーは実際に使用するアプリでの使用をお求めています。
+そのため、HTMLコードは実際に使用するアプリのPOCを想定して作成してください。
 修正要求：${prompt}
 
 現在のコード：
