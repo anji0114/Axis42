@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { apiClient } from "@/lib/apiClient";
 
-export const Header = () => {
+export const DashboardHeader = () => {
   const { profile } = useGetProfile();
 
   const handleLogout = async () => {

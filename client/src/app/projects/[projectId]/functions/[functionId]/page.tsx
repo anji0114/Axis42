@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthGuard } from "@/components/AuthGuard";
+import { AuthGuard } from "@/components/auth-guard";
 import { Button } from "@/components/ui/button";
 import { PageLoading } from "@/components/ui/loading";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -62,11 +62,11 @@ const FunctionDetailPage = () => {
               <TabsTrigger value="generate">生成</TabsTrigger>
               <TabsTrigger value="list">バリエーション</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="generate" className="mt-6">
               <GenerateForm />
             </TabsContent>
-            
+
             <TabsContent value="list" className="mt-6">
               <FunctionVariations variations={functionData.variations} />
             </TabsContent>

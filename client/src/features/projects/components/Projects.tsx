@@ -24,7 +24,7 @@ export const Projects = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900">
                 プロジェクト一覧
               </h1>
               <p className="text-gray-600 mt-2">プロジェクトを管理します</p>

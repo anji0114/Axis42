@@ -3,8 +3,8 @@
 import { useGetAuth } from "@/hooks/getAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { LoadingSpinner } from "./ui/loading";
-import { Header } from "./Header";
+import { LoadingSpinner } from "@/components/ui/loading";
+import { DashboardHeader } from "./dashboard-header";
 
 export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const { auth, isLoading, error } = useGetAuth();
@@ -25,9 +25,9 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <>
-      <Header />
+    <div>
+      <DashboardHeader />
       <div>{children}</div>
-    </>
+    </div>
   );
 };

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Sans_JP, Roboto } from "next/font/google";
+import { Noto_Sans_JP, Roboto } from "next/font/google";
+import { QueryProvider } from "@/components/provider/query-provider";
 import "@/styles/globals.css";
-import { QueryProvider } from "@/components/QueryProvider";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans",
@@ -16,7 +16,10 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Vulcan Engine",
+  title: {
+    template: "%s | Vulcan Engine",
+    default: "Vulcan Engine",
+  },
   description: "Vulcan Engineは、ビジネスのためのプラットフォームです。",
 };
 
