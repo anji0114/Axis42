@@ -3,6 +3,8 @@ import { PrismaService } from '@/core/database/prisma/prisma.service';
 import { AnthropicService } from '@/modules/anthropic/anthropic.service';
 import { CreateComponentDto } from './dto/create-component.dto';
 import { Component } from '@prisma/client';
+import { extractHtmlContent } from './utils/html-extractor.util';
+import { PROMPT_TEMPLATES } from './constants/prompts.constant';
 
 @Injectable()
 export class ComponentsService {
@@ -73,19 +75,16 @@ export class ComponentsService {
     const component = await this.getComponent(userId, id);
 
     // AI修正
-    const updatePrompt = `以下のHTMLコードを修正してください：
+    const updatePrompt = PROMPT_TEMPLATES.UPDATE_COMPONENT(
+      prompt,
+      component.content || PROMPT_TEMPLATES.DEFAULT_HTML,
+      framework || component.framework,
+    );
 
-修正要求：${prompt}
+    const aiResponse = await this.anthropicService.createMessage(updatePrompt);
 
-現在のコード：
-${component.content || '<html><head><title>New Component</title></head><body></body></html>'}
-
-フレームワーク: ${framework || component.framework}
-
-注意：HTMLコード以外は一切出力しないでください。`;
-
-    const updatedContent =
-      await this.anthropicService.createMessage(updatePrompt);
+    // AIレスポンスからHTMLのみを抽出
+    const updatedContent = extractHtmlContent(aiResponse);
 
     const updateData: { content: string; framework?: string } = {
       content: updatedContent,

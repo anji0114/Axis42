@@ -1,17 +1,14 @@
 "use client";
 
 import { AuthGuard } from "@/components/layout/auth-guard";
-import { Button } from "@/components/ui/button";
 import { PageLoading } from "@/components/ui/loading";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { formatDate } from "@/lib/dateUtils";
 import { GenerateForm } from "@/features/functions/GenerateForm";
 import { useGetComponentDetail } from "@/features/functions/hooks/useGetFunctionDetail";
 
 const ComponentDetailPage = () => {
-  const router = useRouter();
-  const { projectId, componentId } = useParams() as {
+  const { componentId } = useParams() as {
     projectId: string;
     componentId: string;
   };
@@ -23,59 +20,67 @@ const ComponentDetailPage = () => {
   }
 
   return (
-    <AuthGuard>
-      <div className="min-h-screen flex flex-col p-5">
-        <div className="px-2 w-full">
-          {/* Component Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => router.push(`/projects/${projectId}`)}
-                  className="mb-2"
-                >
-                  ← プロジェクトに戻る
-                </Button>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {componentData.name}
-                </h1>
-                <p className="text-gray-600 mt-2">
-                  {componentData.description}
-                </p>
-                <div className="flex gap-4 mt-4 text-sm text-gray-500">
-                  <span>作成日: {formatDate(componentData.createdAt)}</span>
-                  <span>更新日: {formatDate(componentData.updatedAt)}</span>
-                  <span>フレームワーク: {componentData.framework}</span>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline">コンポーネントを編集</Button>
+    <AuthGuard hideHeader>
+      <div className="min-h-screen flex flex-col">
+        {/* Header */}
+        <div className="border-b bg-white px-10 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {componentData.name}
+              </h1>
+              <p className="text-gray-600 text-sm">
+                {componentData.description}
+              </p>
+              <div className="flex gap-4 mt-2 text-xs text-gray-500">
+                <span>作成日: {formatDate(componentData.createdAt)}</span>
+                <span>更新日: {formatDate(componentData.updatedAt)}</span>
+                <span>フレームワーク: {componentData.framework}</span>
               </div>
             </div>
           </div>
+        </div>
 
-          <Tabs defaultValue="preview" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="preview">プレビュー</TabsTrigger>
-              <TabsTrigger value="edit">編集</TabsTrigger>
-            </TabsList>
+        {/* Main Content - Split Layout */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left Panel - Chat/Messages */}
+          <div className="w-1/2 border-r bg-gray-50 flex flex-col">
+            <div className="py-4 px-10 border-b bg-white">
+              <h2 className="text-lg font-semibold text-gray-900">
+                コンポーネント編集
+              </h2>
+              <p className="text-sm text-gray-600">
+                AIに指示してコンポーネントを修正できます
+              </p>
+            </div>
+            <div className="flex-1 overflow-auto px-10 py-4">
+              <GenerateForm componentId={componentId} />
+            </div>
+          </div>
 
-            <TabsContent value="preview" className="mt-6">
-              <div className="border rounded-lg p-4">
+          {/* Right Panel - Preview */}
+          <div className="w-1/2 flex flex-col">
+            <div className="px-10 py-4 border-b bg-white">
+              <h2 className="text-lg font-semibold text-gray-900">
+                プレビュー
+              </h2>
+              <p className="text-sm text-gray-600">
+                リアルタイムでコンポーネントの表示を確認
+              </p>
+            </div>
+            <div className="flex-1 px-10 py-4">
+              <div className="h-full border rounded-lg bg-white">
                 <iframe
-                  srcDoc={componentData.content}
-                  className="w-full h-96 border-0"
+                  srcDoc={
+                    componentData.content ||
+                    '<html><head><title>Empty Component</title></head><body><p style="text-align: center; padding: 20px;">コンポーネントのコンテンツがありません</p></body></html>'
+                  }
+                  className="w-full h-full border-0 rounded-lg"
                   title="Component Preview"
                 />
               </div>
-            </TabsContent>
-
-            <TabsContent value="edit" className="mt-6">
-              <GenerateForm componentId={componentId} />
-            </TabsContent>
-          </Tabs>
+            </div>
+          </div>
         </div>
       </div>
     </AuthGuard>

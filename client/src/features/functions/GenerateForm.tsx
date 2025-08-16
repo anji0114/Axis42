@@ -65,6 +65,7 @@ export const GenerateForm = ({ componentId }: GenerateFormProps) => {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               rows={6}
+              className="min-h-48"
               required
             />
           </div>

@@ -6,7 +6,12 @@ import { useEffect } from "react";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { DashboardHeader } from "./dashboard-header";
 
-export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
+type AuthGuardProps = {
+  children: React.ReactNode;
+  hideHeader?: boolean;
+};
+
+export const AuthGuard = ({ children, hideHeader = false }: AuthGuardProps) => {
   const { auth, isLoading, error } = useGetAuth();
   const router = useRouter();
 
@@ -26,7 +31,7 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div>
-      <DashboardHeader />
+      {!hideHeader && <DashboardHeader />}
       <div>{children}</div>
     </div>
   );
