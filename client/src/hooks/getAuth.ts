@@ -1,3 +1,4 @@
+import { apiClient } from "@/lib/apiClient";
 import { useEffect, useState } from "react";
 
 type Auth = {
@@ -14,9 +15,22 @@ export const useGetAuth = () => {
   useEffect(() => {
     const fetchAuth = async () => {
       try {
-        const response = await fetch("http://localhost:3300/api/auth/me", {
+        const response = await apiClient("/api/auth/me", {
           credentials: "include",
         });
+
+        if (response.status === 401) {
+          const refreshResponse = await apiClient("/api/auth/refresh", {
+            credentials: "include",
+          });
+
+          if (refreshResponse.ok) {
+            const data = await refreshResponse.json();
+            setAuth(data as Auth);
+            setIsLoading(false);
+            return;
+          }
+        }
 
         if (!response.ok) {
           setIsLoading(false);
