@@ -27,7 +27,6 @@ export const Projects = () => {
               <h1 className="text-xl font-bold text-gray-900">
                 プロジェクト一覧
               </h1>
-              <p className="text-gray-600 mt-2">プロジェクトを管理します</p>
             </div>
             <Button onClick={() => setIsDialogOpen(true)}>新規作成</Button>
           </div>

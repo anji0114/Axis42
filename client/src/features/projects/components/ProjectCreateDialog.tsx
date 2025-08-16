@@ -13,6 +13,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateProject } from "../hooks/useCreateProject";
+import { createProjectFormSchema } from "../constants/createProjectForm";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import z from "zod";
 
 interface ProjectCreateDialogProps {
   open: boolean;
@@ -27,12 +31,20 @@ export const ProjectCreateDialog = ({
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createProject } = useCreateProject();
+  const {
+    register,
+    handleSubmit,
+    formState: { isValid },
+  } = useForm<z.infer<typeof createProjectFormSchema>>({
+    resolver: zodResolver(createProjectFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!name.trim()) return;
-
+  const onSubmit = async (data: z.infer<typeof createProjectFormSchema>) => {
+    if (!data.name.trim()) return;
     setIsSubmitting(true);
 
     createProject(
@@ -65,15 +77,14 @@ export const ProjectCreateDialog = ({
         <DialogHeader>
           <DialogTitle>新しいプロジェクトを作成</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-6">
           <div className="space-y-2">
             <Label htmlFor="name">
               プロジェクト名 <span className="text-red-500">*</span>
             </Label>
             <Input
               id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register("name")}
               placeholder="プロジェクト名を入力"
               required
               disabled={isSubmitting}
@@ -82,9 +93,7 @@ export const ProjectCreateDialog = ({
           <div className="space-y-2">
             <Label htmlFor="description">説明</Label>
             <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              {...register("description")}
               placeholder="プロジェクトの説明を入力（任意）"
               className="min-h-28 max-h-48"
               disabled={isSubmitting}
@@ -99,7 +108,7 @@ export const ProjectCreateDialog = ({
             >
               キャンセル
             </Button>
-            <Button type="submit" disabled={!name.trim() || isSubmitting}>
+            <Button type="submit" disabled={!isValid || isSubmitting}>
               {isSubmitting ? "作成中..." : "プロジェクト作成"}
             </Button>
           </DialogFooter>

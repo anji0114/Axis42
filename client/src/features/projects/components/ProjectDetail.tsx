@@ -21,6 +21,7 @@ export const ProjectDetail = () => {
   const router = useRouter();
   const { projectId } = useParams() as { projectId: string };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const { mutate: createFunction } = useMutation({
     mutationFn: async (data: {
       name: string;
@@ -73,7 +74,7 @@ export const ProjectDetail = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => setIsDialogOpen(true)}>新しい関数</Button>
+              <Button onClick={() => setIsDialogOpen(true)}>新しい機能</Button>
             </div>
           </div>
         </div>

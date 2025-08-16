@@ -41,12 +41,14 @@ export const ProjectCard = ({ project, onDelete }: Props) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-1">
           {project.functions.map((functionItem) => (
-            <div key={functionItem.id}>{functionItem.name}</div>
+            <li className="text-sm" key={functionItem.id}>
+              {functionItem.name}
+            </li>
           ))}
-        </div>
-        <div className="space-y-2">
+        </ul>
+        <div className="flex gap-2">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">作成日:</span>
             <span>{formatDate(project.createdAt)}</span>

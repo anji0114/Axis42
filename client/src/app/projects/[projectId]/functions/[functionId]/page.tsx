@@ -26,7 +26,7 @@ const FunctionDetailPage = () => {
   return (
     <AuthGuard>
       <div className="min-h-screen flex flex-col p-5">
-        <div className="max-w-6xl mx-auto w-full">
+        <div className="px-2 w-full">
           {/* Function Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
