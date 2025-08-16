@@ -15,7 +15,7 @@ export type Variation = {
   updatedAt: string;
 };
 
-type FunctionDetail = {
+export type FunctionDetail = {
   createdAt: string;
   description: string;
   id: string;

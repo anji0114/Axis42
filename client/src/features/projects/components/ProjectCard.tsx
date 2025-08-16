@@ -4,13 +4,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/dateUtils";
 import { useRouter } from "next/navigation";
 import { Project } from "../hooks/useGetProjects";
+import Link from "next/link";
 
 type Props = {
   onDelete: (projectId: string) => void;
@@ -23,12 +23,29 @@ export const ProjectCard = ({ project, onDelete }: Props) => {
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
-        <CardTitle className="text-lg">{project.name}</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg">
+            <Link href={`/projects/${project.id}`}>{project.name}</Link>
+          </CardTitle>
+          <Button
+            variant="outline"
+            size="icon"
+            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+            onClick={() => onDelete(project.id)}
+          >
+            <Trash2 size={16} />
+          </Button>
+        </div>
         <CardDescription className="text-sm text-gray-600">
           {project.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="flex flex-col gap-2">
+          {project.functions.map((functionItem) => (
+            <div key={functionItem.id}>{functionItem.name}</div>
+          ))}
+        </div>
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">作成日:</span>
@@ -40,23 +57,6 @@ export const ProjectCard = ({ project, onDelete }: Props) => {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="gap-2">
-        <Button
-          className="flex-1"
-          variant="outline"
-          onClick={() => router.push(`/projects/${project.id}`)}
-        >
-          プロジェクトを開く
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-          onClick={() => onDelete(project.id)}
-        >
-          <Trash2 size={16} />
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

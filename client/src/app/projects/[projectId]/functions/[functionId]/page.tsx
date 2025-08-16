@@ -1,16 +1,13 @@
 "use client";
 
-import { AuthGuard } from "@/components/auth-guard";
+import { AuthGuard } from "@/components/layout/auth-guard";
 import { Button } from "@/components/ui/button";
 import { PageLoading } from "@/components/ui/loading";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useParams, useRouter } from "next/navigation";
 import { formatDate } from "@/lib/dateUtils";
-import { apiClient } from "@/lib/apiClient";
-import { useQuery } from "@tanstack/react-query";
 import { GenerateForm } from "@/features/functions/GenerateForm";
 import { FunctionVariations } from "@/features/functions/FunctionVariations";
-import { QUERY_KEY } from "@/constants/queryKey";
 import { useGetFunctionDetail } from "@/features/functions/hooks/useGetFunctionDetail";
 
 const FunctionDetailPage = () => {

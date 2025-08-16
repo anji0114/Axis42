@@ -1,4 +1,4 @@
-import { AuthGuard } from "@/components/auth-guard";
+import { AuthGuard } from "@/components/layout/auth-guard";
 import { ProjectDetail } from "@/features/projects/components/ProjectDetail";
 
 const ProjectPage = () => {

@@ -28,6 +28,13 @@ export class ProjectsService {
       orderBy: {
         createdAt: 'desc',
       },
+      include: {
+        functions: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
     });
   }
 

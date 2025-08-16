@@ -64,21 +64,6 @@ export const DashboardHeader = () => {
                   <p className="text-xs text-gray-500">{profile.email}</p>
                 </div>
 
-                <div className="space-y-1">
-                  <Link
-                    href="/profile"
-                    className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
-                  >
-                    プロフィール
-                  </Link>
-                  <Link
-                    href="/settings"
-                    className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
-                  >
-                    設定
-                  </Link>
-                </div>
-
                 <div className="border-t border-gray-100 pt-3">
                   <button
                     onClick={handleLogout}
