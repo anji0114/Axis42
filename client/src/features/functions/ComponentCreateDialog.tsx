@@ -13,17 +13,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-interface FunctionCreateDialogProps {
+interface ComponentCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit?: (data: { name: string; description: string | undefined }) => void;
+  onSubmit?: (data: { name: string; description: string }) => void;
 }
 
-export const FunctionCreateDialog = ({
+export const ComponentCreateDialog = ({
   open,
   onOpenChange,
   onSubmit,
-}: FunctionCreateDialogProps) => {
+}: ComponentCreateDialogProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +46,7 @@ export const FunctionCreateDialog = ({
       setDescription("");
       onOpenChange(false);
     } catch (error) {
-      console.error("Failed to create function:", error);
+      console.error("Failed to create component:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -60,18 +60,18 @@ export const FunctionCreateDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>新しい関数を作成</DialogTitle>
+          <DialogTitle>新しいコンポーネントを作成</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">関数名 *</Label>
+            <Label htmlFor="name">コンポーネント名 *</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="関数名を入力"
+              placeholder="コンポーネント名を入力"
               required
               disabled={isSubmitting}
             />
@@ -82,11 +82,12 @@ export const FunctionCreateDialog = ({
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="関数の説明を入力（任意）"
-              rows={3}
+              placeholder="コンポーネントの説明を入力（任意）"
+              rows={2}
               disabled={isSubmitting}
             />
           </div>
+
           <DialogFooter>
             <Button
               type="button"
@@ -97,7 +98,7 @@ export const FunctionCreateDialog = ({
               キャンセル
             </Button>
             <Button type="submit" disabled={!name.trim() || isSubmitting}>
-              {isSubmitting ? "作成中..." : "関数を作成"}
+              {isSubmitting ? "作成中..." : "コンポーネントを作成"}
             </Button>
           </DialogFooter>
         </form>

@@ -7,19 +7,18 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useParams, useRouter } from "next/navigation";
 import { formatDate } from "@/lib/dateUtils";
 import { GenerateForm } from "@/features/functions/GenerateForm";
-import { FunctionVariations } from "@/features/functions/FunctionVariations";
-import { useGetFunctionDetail } from "@/features/functions/hooks/useGetFunctionDetail";
+import { useGetComponentDetail } from "@/features/functions/hooks/useGetFunctionDetail";
 
-const FunctionDetailPage = () => {
+const ComponentDetailPage = () => {
   const router = useRouter();
-  const { projectId, functionId } = useParams() as {
+  const { projectId, componentId } = useParams() as {
     projectId: string;
-    functionId: string;
+    componentId: string;
   };
 
-  const { data: functionData } = useGetFunctionDetail(functionId);
+  const { data: componentData } = useGetComponentDetail(componentId);
 
-  if (!functionData) {
+  if (!componentData) {
     return <PageLoading />;
   }
 
@@ -27,7 +26,7 @@ const FunctionDetailPage = () => {
     <AuthGuard>
       <div className="min-h-screen flex flex-col p-5">
         <div className="px-2 w-full">
-          {/* Function Header */}
+          {/* Component Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
@@ -40,32 +39,41 @@ const FunctionDetailPage = () => {
                   ← プロジェクトに戻る
                 </Button>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  {functionData.name}
+                  {componentData.name}
                 </h1>
-                <p className="text-gray-600 mt-2">{functionData.description}</p>
+                <p className="text-gray-600 mt-2">
+                  {componentData.description}
+                </p>
                 <div className="flex gap-4 mt-4 text-sm text-gray-500">
-                  <span>作成日: {formatDate(functionData.createdAt)}</span>
-                  <span>更新日: {formatDate(functionData.updatedAt)}</span>
+                  <span>作成日: {formatDate(componentData.createdAt)}</span>
+                  <span>更新日: {formatDate(componentData.updatedAt)}</span>
+                  <span>フレームワーク: {componentData.framework}</span>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline">関数を編集</Button>
+                <Button variant="outline">コンポーネントを編集</Button>
               </div>
             </div>
           </div>
 
-          <Tabs defaultValue="generate" className="w-full">
+          <Tabs defaultValue="preview" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="generate">生成</TabsTrigger>
-              <TabsTrigger value="list">バリエーション</TabsTrigger>
+              <TabsTrigger value="preview">プレビュー</TabsTrigger>
+              <TabsTrigger value="edit">編集</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="generate" className="mt-6">
-              <GenerateForm />
+            <TabsContent value="preview" className="mt-6">
+              <div className="border rounded-lg p-4">
+                <iframe
+                  srcDoc={componentData.content}
+                  className="w-full h-96 border-0"
+                  title="Component Preview"
+                />
+              </div>
             </TabsContent>
 
-            <TabsContent value="list" className="mt-6">
-              <FunctionVariations variations={functionData.variations} />
+            <TabsContent value="edit" className="mt-6">
+              <GenerateForm componentId={componentId} />
             </TabsContent>
           </Tabs>
         </div>
@@ -74,4 +82,4 @@ const FunctionDetailPage = () => {
   );
 };
 
-export default FunctionDetailPage;
+export default ComponentDetailPage;

@@ -1,5 +1,4 @@
 export const QUERY_KEY = {
   PROJECTS: "projects",
-  FUNCTION_DETAIL: "function",
-  VARIATION_DETAIL: "variationDetail",
+  COMPONENT_DETAIL: "component",
 } as const;

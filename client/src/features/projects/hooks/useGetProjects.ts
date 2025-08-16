@@ -1,7 +1,7 @@
 import { QUERY_KEY } from "@/constants/queryKey";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
-import { FunctionDetail } from "@/features/functions/hooks/useGetFunctionDetail";
+import { ComponentDetail } from "@/features/functions/hooks/useGetFunctionDetail";
 
 export type Project = {
   id: string;
@@ -9,7 +9,7 @@ export type Project = {
   description: string;
   createdAt: string;
   updatedAt: string;
-  functions: FunctionDetail[];
+  components: ComponentDetail[];
 };
 
 export const useGetProjects = () => {

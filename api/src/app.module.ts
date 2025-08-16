@@ -5,8 +5,7 @@ import { PrismaModule } from '@/core/database/prisma/prisma.module';
 import { AuthModule } from '@/core/auth/auth.module';
 import { UsersModule } from '@/modules/users/users.module';
 import { ProjectsModule } from '@/modules/projects/projects.module';
-import { FunctionsModule } from '@/modules/functions/functions.module';
-import { VariationsModule } from '@/modules/variations/variations.module';
+import { ComponentsModule } from '@/modules/components/components.module';
 import { AnthropicModule } from '@/modules/anthropic/anthropic.module';
 
 @Module({
@@ -15,8 +14,7 @@ import { AnthropicModule } from '@/modules/anthropic/anthropic.module';
     AuthModule,
     UsersModule,
     ProjectsModule,
-    FunctionsModule,
-    VariationsModule,
+    ComponentsModule,
     AnthropicModule,
   ],
   controllers: [AppController],

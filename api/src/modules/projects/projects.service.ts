@@ -29,7 +29,7 @@ export class ProjectsService {
         createdAt: 'desc',
       },
       include: {
-        functions: {
+        components: {
           orderBy: {
             createdAt: 'desc',
           },
@@ -45,7 +45,7 @@ export class ProjectsService {
         userId,
       },
       include: {
-        functions: true,
+        components: true,
       },
     });
 

@@ -27,8 +27,6 @@ export const ProjectCreateDialog = ({
   open,
   onOpenChange,
 }: ProjectCreateDialogProps) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createProject } = useCreateProject();
   const {
@@ -48,11 +46,9 @@ export const ProjectCreateDialog = ({
     setIsSubmitting(true);
 
     createProject(
-      { name: name.trim(), description: description.trim() },
+      { name: data.name.trim(), description: data.description!.trim() },
       {
         onSuccess: () => {
-          setName("");
-          setDescription("");
           onOpenChange(false);
         },
         onError: (error) => {
@@ -66,8 +62,6 @@ export const ProjectCreateDialog = ({
   };
 
   const handleCancel = () => {
-    setName("");
-    setDescription("");
     onOpenChange(false);
   };
 

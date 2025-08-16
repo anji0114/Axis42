@@ -14,7 +14,7 @@ import { apiClient } from "@/lib/apiClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatDate } from "@/lib/dateUtils";
 import Link from "next/link";
-import { FunctionCreateDialog } from "@/features/functions/FunctionCreateDialog";
+import { ComponentCreateDialog } from "@/features/functions/ComponentCreateDialog";
 import { useState } from "react";
 
 export const ProjectDetail = () => {
@@ -22,12 +22,9 @@ export const ProjectDetail = () => {
   const { projectId } = useParams() as { projectId: string };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { mutate: createFunction } = useMutation({
-    mutationFn: async (data: {
-      name: string;
-      description: string | undefined;
-    }) => {
-      const response = await apiClient(`/api/functions`, {
+  const { mutate: createComponent } = useMutation({
+    mutationFn: async (data: { name: string; description: string }) => {
+      const response = await apiClient(`/api/components`, {
         method: "POST",
         body: JSON.stringify({ ...data, projectId }),
         headers: {
@@ -38,7 +35,7 @@ export const ProjectDetail = () => {
     },
     onSuccess: (data: { id: string }) => {
       setIsDialogOpen(false);
-      router.push(`/projects/${projectId}/functions/${data.id}`);
+      router.push(`/projects/${projectId}/components/${data.id}`);
     },
   });
 
@@ -74,33 +71,35 @@ export const ProjectDetail = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => setIsDialogOpen(true)}>新しい機能</Button>
+              <Button onClick={() => setIsDialogOpen(true)}>
+                新しいコンポーネント
+              </Button>
             </div>
           </div>
         </div>
-        <FunctionCreateDialog
+        <ComponentCreateDialog
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
-          onSubmit={(data) => createFunction(data)}
+          onSubmit={(data) => createComponent(data)}
         />
 
-        {/* Functions List */}
+        {/* Components List */}
         <div className="space-y-6">
-          {project.functions.map((func: any) => (
-            <Card key={func.id} className="p-6">
+          {project.components.map((component: any) => (
+            <Card key={component.id} className="p-6">
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl">{func.name}</CardTitle>
+                    <CardTitle className="text-xl">{component.name}</CardTitle>
                     <CardDescription className="mt-1">
-                      {func.description}
+                      {component.description}
                     </CardDescription>
                   </div>
                   <CardAction>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" asChild>
                         <Link
-                          href={`/projects/${projectId}/functions/${func.id}`}
+                          href={`/projects/${projectId}/components/${component.id}`}
                         >
                           詳細を見る
                         </Link>

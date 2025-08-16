@@ -42,9 +42,9 @@ export const ProjectCard = ({ project, onDelete }: Props) => {
       </CardHeader>
       <CardContent>
         <ul className="flex flex-col gap-1">
-          {project.functions.map((functionItem) => (
-            <li className="text-sm" key={functionItem.id}>
-              {functionItem.name}
+          {project.components.map((componentItem) => (
+            <li className="text-sm" key={componentItem.id}>
+              {componentItem.name}
             </li>
           ))}
         </ul>

@@ -2,39 +2,27 @@ import { QUERY_KEY } from "@/constants/queryKey";
 import { apiClient } from "@/lib/apiClient";
 import { useQuery } from "@tanstack/react-query";
 
-export type Variation = {
-  aiModel: string;
-  createdAt: string;
-  description: string;
-  framework: string;
-  functionId: string;
-  id: string;
-  isActive: boolean;
-  name: string;
-  prompt: string;
-  updatedAt: string;
-};
-
-export type FunctionDetail = {
+export type ComponentDetail = {
   createdAt: string;
   description: string;
   id: string;
   name: string;
   projectId: string;
   updatedAt: string;
-  variations: Variation[];
+  content: string;
+  framework: string;
 };
 
-export const useGetFunctionDetail = (functionId: string) => {
-  const { data, isLoading, error } = useQuery<FunctionDetail>({
-    queryKey: [QUERY_KEY.FUNCTION_DETAIL, functionId],
+export const useGetComponentDetail = (componentId: string) => {
+  const { data, isLoading, error } = useQuery<ComponentDetail>({
+    queryKey: [QUERY_KEY.COMPONENT_DETAIL, componentId],
     queryFn: async () => {
-      const response = await apiClient(`/api/functions/${functionId}`, {
+      const response = await apiClient(`/api/components/${componentId}`, {
         method: "GET",
       });
       return response.json();
     },
-    enabled: !!functionId,
+    enabled: !!componentId,
   });
 
   return { data, isLoading, error };

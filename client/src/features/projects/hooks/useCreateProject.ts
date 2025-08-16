@@ -9,7 +9,7 @@ export const useCreateProject = () => {
     isPending,
     error,
   } = useMutation({
-    mutationFn: async (data: { name: string; description: string | null }) => {
+    mutationFn: async (data: { name: string; description: string }) => {
       try {
         const response = await apiClient(`/api/projects`, {
           method: "POST",
@@ -18,6 +18,7 @@ export const useCreateProject = () => {
             "Content-Type": "application/json",
           },
         });
+        console.log("response", response);
 
         if (!response.ok) {
           throw new Error("Failed to create project");
