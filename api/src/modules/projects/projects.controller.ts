@@ -4,15 +4,18 @@ import {
   Body,
   UseGuards,
   Req,
-  BadRequestException,
   Get,
   Param,
   Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ProjectsService } from './projects.service';
-import { createProjectSchema } from './dto/create-project.dto';
+import {
+  createProjectSchema,
+  CreateProjectDto,
+} from './dto/create-project.dto';
 import { AuthUser } from '@/shared/types/auth.types';
+import { createZodPipe } from '@/shared/pipes/zod-validation.pipe';
 
 interface RequestWithUser extends Request {
   user: AuthUser;
@@ -24,15 +27,15 @@ export class ProjectsController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  async createProject(@Body() body: any, @Req() req: RequestWithUser) {
-    const result = createProjectSchema.safeParse(body);
-    if (!result.success) {
-      throw new BadRequestException(result.error.issues);
-    }
+  async createProject(
+    @Body(createZodPipe(createProjectSchema, true)) dto: CreateProjectDto,
+    @Req() req: RequestWithUser,
+  ) {
+    console.log('🎯 コントローラーで受信したデータ:', dto);
 
     const project = await this.projectsService.createProject(
       req.user.userId,
-      result.data,
+      dto,
     );
 
     return project;
