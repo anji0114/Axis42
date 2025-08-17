@@ -17,10 +17,10 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Vulcan Engine",
-    default: "Vulcan Engine",
+    template: "%s | Axis42",
+    default: "Axis42",
   },
-  description: "Vulcan Engineは、ビジネスのためのプラットフォームです。",
+  description: "Axis42は、ビジネスのためのプラットフォームです。",
 };
 
 export default function RootLayout({

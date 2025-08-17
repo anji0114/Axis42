@@ -7,7 +7,7 @@ export class AppService {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Vulcan API</title>
+          <title>Axis42 API</title>
           <style>
             body {
               margin: 0;
@@ -35,8 +35,8 @@ export class AppService {
           </style>
         </head>
         <body>
-          <h1>Welcome to Vulcan API</h1>
-          <p>This is the API for the Vulcan project.</p>
+          <h1>Welcome to Axis42 API</h1>
+          <p>This is the API for the Axis42 project.</p>
         </body>
       </html>
     `;

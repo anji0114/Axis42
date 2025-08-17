@@ -1,4 +1,4 @@
-# 🚀 Vulcan Phase 2 ロードマップ
+# 🚀 Axis42 Phase 2 ロードマップ
 
 ## 📋 Phase 2 の目標
 MVPから一般公開可能な安定したプロダクトへの発展

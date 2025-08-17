@@ -31,7 +31,7 @@ export const DashboardHeader = () => {
         <Link href="/projects" className="flex items-center gap-2">
           <Image src="/logo/vulcan.svg" alt="logo" width={28} height={28} />
           <span className="text-lg font-bold pt-px inline-block font-roboto">
-            Vulcan
+            Axis42
           </span>
         </Link>
 

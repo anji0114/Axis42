@@ -8,7 +8,7 @@ export const MarketingHeader = () => {
       <Link href="/" className="flex items-center gap-2">
         <Image src="/logo/vulcan.svg" alt="logo" width={28} height={28} />
         <span className="text-lg font-bold pt-px inline-block font-roboto">
-          Vulcan Engine
+          Axis42
         </span>
       </Link>
       <div className="flex items-center gap-2">
