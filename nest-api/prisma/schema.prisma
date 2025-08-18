@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザー管理
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  profileImageUrl String?
+  lastLoginAt     DateTime?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // リレーション
+  projects        Project[]
+  refreshTokens   RefreshToken[]  // 長期ログイン維持用
+  apiUsages       ApiUsage[]
+  oauthAccounts   OAuthAccount[]  // 複数OAuth対応
+  
+}
+
+// OAuth アカウント管理（複数プロバイダー対応）
+model OAuthAccount {
+  id           String   @id @default(cuid())
+  userId       String
+  provider     String   // "google" | "github" | "discord" etc
+  providerId   String   // プロバイダー側のユーザーID
+  email        String?  // プロバイダーから取得したメール
+  username     String?  // GitHub username等
+  accessToken  String?  @db.Text // 必要に応じて暗号化
+  refreshToken String?  @db.Text
+  expiresAt    DateTime?
+  scope        String?  // 取得した権限スコープ
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerId])
+  @@unique([userId, provider])  // 1ユーザーにつき1プロバイダー1アカウント
+  @@index([userId])
+  @@index([provider, email])
+}
+
+// JWTのリフレッシュトークン管理
+model RefreshToken {
+  id          String    @id @default(cuid())
+  userId      String
+  tokenHash   String    @unique // ハッシュ化して保存
+  isRevoked   Boolean   @default(false)
+  expiresAt   DateTime  // 7日後
+  userAgent   String?
+  ipAddress   String?
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+}
+
+// API使用状況（レート制御用）
+model ApiUsage {
+  id          String    @id @default(cuid())
+  userId      String
+  endpoint    String    // 例: "/ai/generate"
+  count       Int       @default(1)
+  windowStart DateTime  // ウィンドウ開始時刻
+  windowEnd   DateTime  // ウィンドウ終了時刻
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, endpoint, windowStart])
+  @@index([userId, windowStart])
+  @@index([windowEnd]) // 期限切れレコードの削除用
+}
+
+// プロジェクト
+model Project {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  components  Component[]
+  
+  @@index([userId])
+}
+
+// コンポーネント（旧Function + Variation統合）
+model Component {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  projectId   String
+  
+  // 現在のコンテンツ（常に最新）
+  content     String    @db.Text
+  framework   String    @default("vanilla")
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@index([projectId])
+}

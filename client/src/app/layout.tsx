@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
-import { Noto_Sans_JP, Roboto } from "next/font/google";
 import { QueryProvider } from "@/components/provider/query-provider";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+import { Noto_Sans_JP, Roboto } from "next/font/google";
 import "@/styles/globals.css";
+
+import theme from "@/lib/theme";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s | Axis42",
+    default: "Axis42",
+  },
+  description: "Axis42は、ビジネスのためのプラットフォームです。",
+};
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans",
@@ -15,14 +27,6 @@ const roboto = Roboto({
   weight: ["400", "500", "600"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    template: "%s | Axis42",
-    default: "Axis42",
-  },
-  description: "Axis42は、ビジネスのためのプラットフォームです。",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,10 +37,13 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.png" />
       </head>
-      <body
-        className={`${notoSansJP.className} ${roboto.variable} bg-primary-100`}
-      >
-        <QueryProvider>{children}</QueryProvider>
+      <body className={`${notoSansJP.variable} ${roboto.variable}`}>
+        <AppRouterCacheProvider>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <QueryProvider>{children}</QueryProvider>
+          </ThemeProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );

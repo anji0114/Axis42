@@ -1,24 +1,31 @@
-import { buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
-import Link from "next/link";
+import { Box, Button, Grid, Link, Typography } from "@mui/material";
 
 export const MarketingHeader = () => {
   return (
-    <header className="flex justify-between items-center p-4 border-b bg-white fixed top-0 z-10 w-full">
-      <Link href="/" className="flex items-center gap-2">
-        <Image src="/logo/vulcan.svg" alt="logo" width={28} height={28} />
-        <span className="text-lg font-bold pt-px inline-block font-roboto">
+    <Box className="flex justify-between items-center p-2 border-b border-gray-200 bg-white fixed top-0 left-0 z-10 w-full">
+      <Link
+        underline="none"
+        href="/"
+        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+      >
+        <Image src="/logo/axis42.svg" alt="logo" width={40} height={40} />
+        <Typography
+          component="span"
+          fontFamily="var(--font-roboto)"
+          fontWeight={500}
+        >
           Axis42
-        </span>
+        </Typography>
       </Link>
-      <div className="flex items-center gap-2">
-        <Link href="/demo" className={buttonVariants({ variant: "outline" })}>
+      <Grid container gap={1}>
+        <Button href="/demo" variant="outlined">
           デモを見る
-        </Link>
-        <Link href="/login" className={buttonVariants({ variant: "default" })}>
+        </Button>
+        <Button href="/login" variant="contained">
           はじめる
-        </Link>
-      </div>
-    </header>
+        </Button>
+      </Grid>
+    </Box>
   );
 };
