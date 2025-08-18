@@ -9,10 +9,11 @@ export const MarketingHeader = () => {
         href="/"
         sx={{ display: "flex", alignItems: "center", gap: 1 }}
       >
-        <Image src="/logo/axis42.svg" alt="logo" width={40} height={40} />
+        <Image src="/logo/axis42.svg" alt="logo" width={24} height={24} />
         <Typography
           component="span"
-          fontFamily="var(--font-roboto)"
+          fontSize={14}
+          fontFamily="var(--font-inter)"
           fontWeight={500}
         >
           Axis42

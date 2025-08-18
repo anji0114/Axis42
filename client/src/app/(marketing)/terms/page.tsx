@@ -1,8 +1,9 @@
 import { BackToTopButton } from "@/features/marketing/components/BackToTopButton";
+import { Box, Typography } from "@mui/material";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <Box bgcolor="background.default" pt={5}>
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="bg-white rounded-lg shadow-sm p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">利用規約</h1>
@@ -118,12 +119,14 @@ export default function TermsPage() {
           </div>
 
           <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-500">最終更新日: 2024年1月1日</p>
+            <Typography color="text.secondary">
+              最終更新日: 2024年1月1日
+            </Typography>
           </div>
 
           <BackToTopButton />
         </div>
       </div>
-    </div>
+    </Box>
   );
 }

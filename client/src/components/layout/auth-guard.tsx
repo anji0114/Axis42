@@ -3,15 +3,14 @@
 import { useGetAuth } from "@/hooks/getAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { LoadingSpinner } from "@/components/ui/loading";
-import { DashboardHeader } from "./dashboard-header";
+import { Box, CircularProgress } from "@mui/material";
 
 type AuthGuardProps = {
   children: React.ReactNode;
   hideHeader?: boolean;
 };
 
-export const AuthGuard = ({ children, hideHeader = false }: AuthGuardProps) => {
+export const AuthGuard = ({ children }: AuthGuardProps) => {
   const { auth, isLoading, error } = useGetAuth();
   const router = useRouter();
 
@@ -23,16 +22,20 @@ export const AuthGuard = ({ children, hideHeader = false }: AuthGuardProps) => {
 
   if (isLoading || error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        minHeight="100vh"
+      >
+        <CircularProgress />
+      </Box>
     );
   }
 
   return (
-    <div>
-      {!hideHeader && <DashboardHeader />}
-      <div>{children}</div>
-    </div>
+    <Box>
+      <Box component="main">{children}</Box>
+    </Box>
   );
 };

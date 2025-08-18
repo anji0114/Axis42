@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { QueryProvider } from "@/components/provider/query-provider";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import { Noto_Sans_JP, Roboto } from "next/font/google";
+import { Inter, Noto_Sans_JP, Roboto } from "next/font/google";
 import "@/styles/globals.css";
 
 import theme from "@/lib/theme";
@@ -21,10 +21,10 @@ const notoSansJP = Noto_Sans_JP({
   weight: ["400", "500", "600"],
 });
 
-const roboto = Roboto({
-  variable: "--font-roboto",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "700"],
 });
 
 export default function RootLayout({
@@ -37,7 +37,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.png" />
       </head>
-      <body className={`${notoSansJP.variable} ${roboto.variable}`}>
+      <body className={`${notoSansJP.variable} ${inter.variable}`}>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             <CssBaseline />

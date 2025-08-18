@@ -1,5 +1,5 @@
 "use client";
-import { Button, Typography, Link } from "@mui/material";
+import { Button, Typography, Link, Box } from "@mui/material";
 import Image from "next/image";
 
 const SignupPage = () => {
@@ -13,30 +13,33 @@ const SignupPage = () => {
       <div className="flex-1 relative">
         {/* サイトアイコン - ヘッダーとして左上に配置 */}
         <div className="absolute top-8 left-8">
-          <div className="flex items-center gap-2">
-            <Image src="/logo/axis42.svg" alt="Axis42" width={24} height={23} />
-          </div>
+          <Link href="/">
+            <Image src="/logo/axis42.svg" alt="Axis42" width={24} height={24} />
+          </Link>
         </div>
 
         {/* 中央のコンテンツ */}
         <div className="flex flex-col justify-center items-center min-h-screen px-8">
-          <div className="w-full max-w-md text-center">
-            {/* Welcome メッセージ */}
-            <div className="mb-8">
-              <Typography variant="h3" fontFamily="var(--font-roboto)">
+          <div className="w-full max-w-lg text-center">
+            <Box>
+              <Typography
+                variant="h3"
+                fontWeight={700}
+                fontFamily="var(--font-inter)"
+              >
                 Welcome to Axis42
               </Typography>
               <Typography
                 variant="body1"
                 color="text.secondary"
-                fontFamily="var(--font-roboto)"
+                fontFamily="var(--font-inter)"
               >
                 Vertical Product Management AI Agent
               </Typography>
-            </div>
+            </Box>
 
             {/* Googleログインボタン */}
-            <div className="mb-8">
+            <Box mt={2}>
               <Button
                 variant="outlined"
                 fullWidth
@@ -55,17 +58,17 @@ const SignupPage = () => {
                 />
                 Googleでログイン
               </Button>
-            </div>
+            </Box>
 
             {/* 利用規約などのリンク */}
-            <div className="text-center text-sm text-gray-600 leading-relaxed">
+            <Box textAlign="center" mt={2}>
               続行することにより、
               <Link href="/terms">利用規約</Link>
               および
               <Link href="/privacy">プライバシーポリシー</Link>
               <br />
               に同意したものとみなされます。
-            </div>
+            </Box>
           </div>
         </div>
       </div>
