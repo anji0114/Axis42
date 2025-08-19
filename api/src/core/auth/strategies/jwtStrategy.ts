@@ -1,11 +1,11 @@
-import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import type { JwtPayload } from '../types';
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
+import type { JwtPayload } from "../types";
 
 // Cookieからトークンを抽出する関数
 const cookieExtractor = (req: any) => {
   let token = null;
   if (req && req.cookies) {
-    token = req.cookies['access_token'];
+    token = req.cookies["access_token"];
   }
   return token;
 };

@@ -1,8 +1,9 @@
-import express, { Request, Response } from 'express';
-import cookieParser from 'cookie-parser';
-import { prisma } from '@/core/database';
-import { passportInstance } from '@/core/auth/services/passport.service';
-import authRoutes from './routes/auth.routes';
+import express, { Request, Response } from "express";
+import cookieParser from "cookie-parser";
+import { prisma } from "@/core/database";
+import { passportInstance } from "@/core/auth/passportService";
+import authRoutes from "./routes/auth.routes";
+import { root } from "@/modules/root";
 
 const app = express();
 const PORT = process.env.PORT || 3300;
@@ -16,25 +17,10 @@ app.use(cookieParser());
 app.use(passportInstance.initialize());
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use("/api/auth", authRoutes);
 
-// Hello Worldルート
-app.get('/', (_req: Request, res: Response) => {
-  res.json({ message: 'Hello World from Axis42 API!', timestamp: new Date().toISOString() });
-});
-
-// Database connection test
-app.get('/health', async (_req: Request, res: Response) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    res.json({ status: 'ok', database: 'connected' });
-  } catch (error) {
-    res.status(500).json({ 
-      status: 'error', 
-      database: 'disconnected', 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    });
-  }
+app.get("/", (_req: Request, res: Response) => {
+  res.send(root());
 });
 
 // サーバー起動
@@ -45,7 +31,7 @@ async function startServer() {
       console.log(`🚀 Server is running on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    console.error("❌ Failed to start server:", error);
     process.exit(1);
   }
 }

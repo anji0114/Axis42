@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { authService } from "../services/auth.service";
+import { authService } from "../authService";
 import type { AuthRequest } from "../types";
 
 // Cookieからトークンを抽出するミドルウェア

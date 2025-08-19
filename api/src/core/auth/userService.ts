@@ -1,6 +1,6 @@
-import { prisma } from '@/core/database';
-import type { GoogleProfile } from '../types';
-import type { User } from '@prisma/client';
+import { prisma } from "@/core/database";
+import type { GoogleProfile } from "./types";
+import type { User } from "@prisma/client";
 
 export class UserService {
   // Google OAuth ユーザー検索・作成
@@ -11,7 +11,7 @@ export class UserService {
     const existingOAuth = await prisma.oAuthAccount.findUnique({
       where: {
         provider_providerId: {
-          provider: 'google',
+          provider: "google",
           providerId: googleId,
         },
       },
@@ -38,7 +38,7 @@ export class UserService {
         lastLoginAt: new Date(),
         oauthAccounts: {
           create: {
-            provider: 'google',
+            provider: "google",
             providerId: googleId,
             email: googleProfile.emails[0].value,
           },
@@ -53,7 +53,7 @@ export class UserService {
   // ユーザーIDで検索
   async findById(userId: string): Promise<User | null> {
     if (!userId) {
-      throw new Error('User ID is required');
+      throw new Error("User ID is required");
     }
 
     return await prisma.user.findUnique({
@@ -64,7 +64,7 @@ export class UserService {
   // メールアドレスで検索
   async findByEmail(email: string): Promise<User | null> {
     if (!email) {
-      throw new Error('Email is required');
+      throw new Error("Email is required");
     }
 
     return await prisma.user.findUnique({
@@ -75,7 +75,7 @@ export class UserService {
   // ユーザー更新
   async updateUser(
     userId: string,
-    data: Partial<Pick<User, 'name' | 'profileImageUrl' | 'lastLoginAt'>>
+    data: Partial<Pick<User, "name" | "profileImageUrl" | "lastLoginAt">>
   ): Promise<User> {
     return await prisma.user.update({
       where: { id: userId },

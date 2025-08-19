@@ -8,18 +8,22 @@ export type {
   LoginResult,
   RefreshTokenResult,
   CookieOptions,
-} from './types';
+} from "./types";
 
 // Services
-export { AuthService, authService } from './services/auth.service';
-export { UserService, userService } from './services/user.service';
+export { AuthService, authService } from "./authService";
+export { UserService, userService } from "./userService";
 
 // Middleware
-export { authenticateJWT, extractTokenFromCookie, optionalAuth } from './middleware/auth.middleware';
+export {
+  authenticateJWT,
+  extractTokenFromCookie,
+  optionalAuth,
+} from "./middleware/authMiddleware";
 
 // Passport
-export { PassportService, passportInstance } from './services/passport.service';
+export { PassportService, passportInstance } from "./passportService";
 
 // Strategies
-export { googleStrategy } from './strategies/google.strategy';
-export { jwtStrategy } from './strategies/jwt.strategy';
+export { googleStrategy } from "./strategies/googleStrategy";
+export { jwtStrategy } from "./strategies/jwtStrategy";

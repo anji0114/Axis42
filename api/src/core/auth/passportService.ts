@@ -1,6 +1,6 @@
 import passport from "passport";
-import { googleStrategy } from "../strategies/google.strategy";
-import { jwtStrategy } from "../strategies/jwt.strategy";
+import { googleStrategy } from "./strategies/googleStrategy";
+import { jwtStrategy } from "./strategies/jwtStrategy";
 
 export class PassportService {
   static initialize() {

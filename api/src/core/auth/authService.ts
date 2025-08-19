@@ -1,17 +1,17 @@
-import jwt, { SignOptions } from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
-import { prisma } from '@/core/database';
-import type { JwtPayload, LoginResult, RefreshTokenResult } from '../types';
-import type { User } from '@prisma/client';
+import jwt, { SignOptions } from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+import { prisma } from "@/core/database";
+import type { JwtPayload, LoginResult, RefreshTokenResult } from "./types";
+import type { User } from "@prisma/client";
 
 export class AuthService {
   private readonly jwtSecret: string;
   private readonly jwtExpiresIn: string;
 
   constructor() {
-    this.jwtSecret = process.env.JWT_SECRET || 'default-secret';
-    this.jwtExpiresIn = process.env.JWT_EXPIRES_IN || '2h';
+    this.jwtSecret = process.env.JWT_SECRET || "default-secret";
+    this.jwtExpiresIn = process.env.JWT_EXPIRES_IN || "2h";
   }
 
   // JWT Access Token生成
@@ -27,7 +27,7 @@ export class AuthService {
     try {
       return jwt.verify(token, this.jwtSecret) as JwtPayload;
     } catch (error) {
-      throw new Error('Invalid or expired token');
+      throw new Error("Invalid or expired token");
     }
   }
 
@@ -40,7 +40,7 @@ export class AuthService {
     const payload: JwtPayload = {
       userId: user.id,
       email: user.email,
-      name: user.name || '',
+      name: user.name || "",
     };
 
     // Access Tokenを生成
@@ -67,7 +67,7 @@ export class AuthService {
     ipAddress?: string
   ): Promise<string> {
     // ランダムなトークンを生成
-    const randomToken = crypto.randomBytes(32).toString('hex');
+    const randomToken = crypto.randomBytes(32).toString("hex");
 
     // 7日後の有効期限
     const expiresAt = new Date();
@@ -77,7 +77,7 @@ export class AuthService {
     const savedToken = await prisma.refreshToken.create({
       data: {
         userId,
-        tokenHash: '', // 後で更新
+        tokenHash: "", // 後で更新
         expiresAt,
         userAgent,
         ipAddress,
@@ -104,9 +104,9 @@ export class AuthService {
     ipAddress?: string
   ): Promise<RefreshTokenResult> {
     // tokenId.randomTokenを分割
-    const parts = refreshToken.split('.');
+    const parts = refreshToken.split(".");
     if (parts.length !== 2) {
-      throw new Error('Invalid refresh token format');
+      throw new Error("Invalid refresh token format");
     }
 
     const [tokenId, randomToken] = parts;
@@ -126,13 +126,13 @@ export class AuthService {
     });
 
     if (!validToken) {
-      throw new Error('Refresh token not found or expired');
+      throw new Error("Refresh token not found or expired");
     }
 
     // ハッシュ値を照合
     const isValid = await bcrypt.compare(randomToken, validToken.tokenHash);
     if (!isValid) {
-      throw new Error('Invalid refresh token');
+      throw new Error("Invalid refresh token");
     }
 
     // 使用済みRefresh Tokenを無効化
@@ -148,7 +148,7 @@ export class AuthService {
     const payload: JwtPayload = {
       userId: validToken.user.id,
       email: validToken.user.email,
-      name: validToken.user.name || '',
+      name: validToken.user.name || "",
     };
 
     const access_token = await this.generateAccessToken(payload);
