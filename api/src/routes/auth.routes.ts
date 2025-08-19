@@ -49,7 +49,7 @@ router.get(
 
       // フロントエンドにリダイレクト
       res.redirect(
-        `${process.env.CLIENT_URL || "http://localhost:3000"}/projects`
+        `${process.env.CLIENT_URL || "http://localhost:3000"}/dashboard`
       );
     } catch (error) {
       console.error("Google OAuth callback error:", error);
