@@ -3,7 +3,7 @@ import { Box, Typography } from "@mui/material";
 
 export default function TermsPage() {
   return (
-    <Box bgcolor="background.default" pt={5}>
+    <Box bgcolor="background.paper" pt={5}>
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="bg-white rounded-lg shadow-sm p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">利用規約</h1>

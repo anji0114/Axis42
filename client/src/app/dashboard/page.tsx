@@ -27,7 +27,7 @@ import {
 
 export default function DashboardPage() {
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4, bgcolor: "grey.50" }}>
       {/* ヘッダーセクション */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
