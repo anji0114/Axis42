@@ -1,14 +1,19 @@
 import express, { Request, Response } from "express";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 import { prisma } from "@/core/database";
 import { passportInstance } from "@/core/auth/passportService";
-import authRoutes from "./routes/auth.routes";
+import authRoutes from "@/routes/auth.routes";
 import { root } from "@/modules/root";
 
 const app = express();
 const PORT = process.env.PORT || 3300;
 
 // ミドルウェア
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

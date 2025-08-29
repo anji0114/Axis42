@@ -39,6 +39,7 @@ export const useGetAuth = () => {
         }
 
         const data = await response.json();
+        console.log(data);
         setAuth(data as Auth);
         setIsLoading(false);
       } catch (error) {

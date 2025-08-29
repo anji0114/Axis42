@@ -15,11 +15,7 @@ export { AuthService, authService } from "./authService";
 export { UserService, userService } from "./userService";
 
 // Middleware
-export {
-  authenticateJWT,
-  extractTokenFromCookie,
-  optionalAuth,
-} from "./middleware/authMiddleware";
+export { authenticateJWT } from "./middleware/authMiddleware";
 
 // Passport
 export { PassportService, passportInstance } from "./passportService";

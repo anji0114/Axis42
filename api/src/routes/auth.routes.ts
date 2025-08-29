@@ -1,10 +1,7 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "@/core/database";
 import { authService } from "@/core/auth/authService";
-import {
-  authenticateJWT,
-  extractTokenFromCookie,
-} from "@/core/auth/middleware/authMiddleware";
+import { authenticateJWT } from "@/core/auth/middleware/authMiddleware";
 import { PassportService } from "@/core/auth/passportService";
 import type { AuthRequest } from "@/core/auth/types";
 import type { User } from "@prisma/client";
@@ -37,7 +34,7 @@ router.get(
       res.cookie(
         "access_token",
         result.access_token,
-        getCookieOptions(2 * 60 * 60 * 1000)
+        getCookieOptions(2 * 60 * 60 * 1000) // 2時間
       );
 
       // Refresh Token Cookie (7日間)
@@ -73,18 +70,13 @@ function getCookieOptions(maxAge: number) {
 }
 
 // 認証状態チェック
-router.get(
-  "/me",
-  extractTokenFromCookie,
-  authenticateJWT,
-  (req: Request, res: Response) => {
-    const authReq = req as AuthRequest;
-    res.json({
-      user: authReq.user,
-      authenticated: true,
-    });
-  }
-);
+router.get("/me", authenticateJWT, (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  res.json({
+    user: authReq.user,
+    authenticated: true,
+  });
+});
 
 // トークンリフレッシュ
 router.post("/refresh", async (req: Request, res: Response) => {
@@ -129,30 +121,25 @@ router.post("/refresh", async (req: Request, res: Response) => {
 });
 
 // ログアウト
-router.post(
-  "/logout",
-  extractTokenFromCookie,
-  authenticateJWT,
-  async (req: Request, res: Response) => {
-    try {
-      const authReq = req as AuthRequest;
+router.post("/logout", authenticateJWT, async (req: Request, res: Response) => {
+  try {
+    const authReq = req as AuthRequest;
 
-      // DBのRefresh Tokenを無効化
-      await authService.revokeRefreshTokens(authReq.user.userId);
+    // DBのRefresh Tokenを無効化
+    await authService.revokeRefreshTokens(authReq.user.userId);
 
-      // Cookieをクリア
-      res.clearCookie("access_token");
-      res.clearCookie("refresh_token");
+    // Cookieをクリア
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
 
-      res.json({ success: true, message: "Logged out successfully" });
-    } catch (error) {
-      res.status(500).json({
-        error: "Logout failed",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
+    res.json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({
+      error: "Logout failed",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
   }
-);
+});
 
 // 開発用: 手動ログイン（テスト用）
 router.post("/dev-login", async (req: Request, res: Response) => {
