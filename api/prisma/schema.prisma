@@ -25,10 +25,11 @@ model User {
   updatedAt       DateTime  @updatedAt
   
   // リレーション
+  projects        Project[]
   refreshTokens   RefreshToken[]  // 長期ログイン維持用
   apiUsages       ApiUsage[]
   oauthAccounts   OAuthAccount[]  // 複数OAuth対応
-  voc          Voc[]
+  
 }
 
 // OAuth アカウント管理（複数プロバイダー対応）
@@ -91,29 +92,36 @@ model ApiUsage {
   @@index([windowEnd]) // 期限切れレコードの削除用
 }
 
+// プロジェクト
+model Project {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  components  Component[]
+  
+  @@index([userId])
+}
 
-// VOC - 核心機能
-model Voc {
-  id         String   @id @default(cuid())
-  title      String
-  content    String   @db.Text
-  source     String   // "zoom" | "slack" | "manual"
-  sourceUrl  String?  // Zoom録画URL等
+// コンポーネント（旧Function + Variation統合）
+model Component {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  projectId   String
   
-  // インパクト（これが最重要）
-  impact     Decimal? @db.Decimal(15, 2) // 予想される収益影響（円）
-  effort     Int?     // 実装工数 (1-10)
+  // 現在のコンテンツ（常に最新）
+  content     String    @db.Text
+  framework   String    @default("vanilla")
   
-  // AI分析結果
-  summary    String?  @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   
-  userId     String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   
-  // リレーション
-  user       User     @relation(fields: [userId], references: [id])
-  
-  @@index([userId, createdAt])
-  @@index([impact, effort]) // インパクトマップ用
+  @@index([projectId])
 }
